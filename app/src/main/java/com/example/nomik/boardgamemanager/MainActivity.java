@@ -1,17 +1,12 @@
 package com.example.nomik.boardgamemanager;
 
-import android.app.Activity;
+//import android.app.Activity;
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -23,6 +18,9 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+
+//import android.graphics.Bitmap;
+//import android.graphics.BitmapFactory;
 
 public class MainActivity extends AppCompatActivity {
     FragmentSearch fragmentSearch;
@@ -43,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
 
         context = this;
 
-        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+        android.support.v4.app.FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
         fragmentTransaction.replace(R.id.fragment_frame, fragmentSearch).commit();
     }
 
@@ -70,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
         ImageButton game = (ImageButton)findViewById(R.id.button_game);
         ImageButton map = (ImageButton)findViewById(R.id.button_map);
 
-        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+       FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
         switch(fragmentname) {
             case "search": {
                 search.setImageResource(R.drawable.button_search_selected);
@@ -93,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
                 game.setImageResource(R.drawable.button_game_unselected);
                 map.setImageResource(R.drawable.button_map_selected);
 
-                fragmentTransaction.replace(R.id.fragment_frame, fragmentMap).commit();
+               fragmentTransaction.replace(R.id.fragment_frame, fragmentMap).commit();
                 break;
             }
         }

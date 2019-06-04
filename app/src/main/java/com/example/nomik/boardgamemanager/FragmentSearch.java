@@ -13,8 +13,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.Toast;
-
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
@@ -25,8 +23,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.regex.Pattern;
 
 
@@ -72,7 +68,6 @@ public class FragmentSearch extends Fragment {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    SortData(s);
                     FragmentSearchAdapter fragmentSearchAdapter = new FragmentSearchAdapter(data);
                     fragmentSearchAdapter.notifyDataSetChanged();
                     search_ListView.setAdapter(fragmentSearchAdapter);
@@ -90,7 +85,6 @@ public class FragmentSearch extends Fragment {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    SortData(s);
                     FragmentSearchAdapter fragmentSearchAdapter = new FragmentSearchAdapter(data);
                     fragmentSearchAdapter.notifyDataSetChanged();
                     search_ListView.setAdapter(fragmentSearchAdapter);
@@ -159,40 +153,5 @@ public class FragmentSearch extends Fragment {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    public void SortData(CharSequence s) {
-        final CharSequence c = s;
-        Comparator<FragmentSearchData> comparator = new Comparator<FragmentSearchData>() {
-            @Override
-            public int compare(FragmentSearchData o1, FragmentSearchData o2) {
-                if (StringHasChar(c, o1.getName())) {
-                    if (StringHasChar(c, o2.getName())) {
-                        return o1.getName().compareTo(o2.getName());
-                    }
-                    else {
-                        return -1;
-                    }
-                }
-                else {
-                    if (StringHasChar(c, o2.getName())) {
-                        return 1;
-                    }
-                    else {
-                        return o1.getName().compareTo(o2.getName());
-                    }
-                }
-            }
-        };
-
-        Collections.sort(data, comparator);
-    }
-
-    public boolean StringHasChar(CharSequence c, String s) {
-        for(int i = 0; i < c.length(); i++) {
-            if(c.toString().toLowerCase().charAt(i) != s.toLowerCase().charAt(i))
-                return false;
-        }
-        return true;
     }
 }
