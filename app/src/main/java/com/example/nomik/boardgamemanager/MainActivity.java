@@ -41,8 +41,10 @@ public class MainActivity extends AppCompatActivity {
 
         context = this;
 
+
         android.support.v4.app.FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
         fragmentTransaction.replace(R.id.fragment_frame, fragmentSearch).commit();
+
     }
 
     public void onClickMenuButton(View view) {
