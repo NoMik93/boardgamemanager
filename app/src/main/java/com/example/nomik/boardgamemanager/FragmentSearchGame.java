@@ -22,6 +22,8 @@ import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static android.app.Activity.RESULT_OK;
+
 public class FragmentSearchGame extends Fragment {
     @Nullable
     @Override
@@ -59,7 +61,7 @@ public class FragmentSearchGame extends Fragment {
                     Intent intent = new Intent(getActivity(), GameActivity.class);
                     intent.putExtra("name", getArguments().getString("name"));
                     intent.putExtra("id", getArguments().getString("id"));
-                    startActivity(intent);
+                    startActivityForResult(intent, 0);
                 }
             });
 
@@ -87,5 +89,14 @@ public class FragmentSearchGame extends Fragment {
             imageView.setImageBitmap(bitmap[0]);
         }
         return view;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(requestCode == 0) {
+            if(resultCode == RESULT_OK)
+
+                ((MainActivity)getActivity()).SetFragment("game");
+        }
     }
 }

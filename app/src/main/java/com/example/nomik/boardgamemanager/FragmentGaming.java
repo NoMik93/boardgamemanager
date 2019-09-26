@@ -20,6 +20,7 @@ public class FragmentGaming extends Fragment {
     private TextView textView_dice;
     private TextView textView_coin;
     private int dice_eye, dice, coin;
+    Thread thread;
 
     @Nullable
     @Override
@@ -34,7 +35,7 @@ public class FragmentGaming extends Fragment {
         dice = 1;
         coin = 1;
 
-        Thread thread = new Thread(new Runnable() {
+        thread = new Thread(new Runnable() {
             @Override
             public void run() {
                 while (!Thread.interrupted()) {
@@ -276,6 +277,7 @@ public class FragmentGaming extends Fragment {
         button_complete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                thread.interrupt();
                 ((GameActivity)getActivity()).SetTime(textView_time.getText().toString());
                 ((GameActivity)getActivity()).SetFragment("score");
             }

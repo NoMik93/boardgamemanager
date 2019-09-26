@@ -47,10 +47,12 @@ public class GameActivity extends AppCompatActivity {
             }
             case "score": {
                 fragmentTransaction.replace(R.id.game_fragment_frame, new FragmentScore()).commit();
+                textViewTitle.setText("점수 계산");
                 break;
             }
             case "complete": {
-                this.finish();
+                setResult(RESULT_OK);
+                finish();
                 break;
             }
         }
@@ -63,5 +65,9 @@ public class GameActivity extends AppCompatActivity {
 
     public void SetTime(String time) {
         this.time = time;
+    }
+
+    public ArrayList<String> getPlayers(){
+        return players;
     }
 }

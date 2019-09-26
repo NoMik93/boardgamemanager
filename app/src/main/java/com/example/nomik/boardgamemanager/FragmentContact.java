@@ -32,7 +32,7 @@ public class FragmentContact extends Fragment {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == 0) {
+        if (requestCode == 1) {
             if (resultCode == RESULT_OK) {
                 ArrayList<ContactItem> temp = (ArrayList<ContactItem>)data.getSerializableExtra("players");
                 for (int i = 0; i < temp.size(); i++) {
@@ -56,7 +56,7 @@ public class FragmentContact extends Fragment {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(getContext(), ContactActivity.class);
-                startActivityForResult(intent, 0);
+                startActivityForResult(intent, 1);
             }
         });
 
@@ -114,17 +114,21 @@ public class FragmentContact extends Fragment {
         imageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ArrayList<String> player = new ArrayList<>();
-                for(int i = 0; i < players.size(); i++) {
-                    player.add(players.get(i).name);
+                if(players.size() == 0) {
+                    Toast.makeText(getContext(), "플레이어가 없습니다.", Toast.LENGTH_SHORT).show();
+                } else {
+                    ArrayList<String> player = new ArrayList<>();
+                    for(int i = 0; i < players.size(); i++) {
+                        player.add(players.get(i).name);
+                    }
+                    ((GameActivity)getActivity()).SetPlayers(player);
+                    ((GameActivity)getActivity()).SetFragment("gaming");
                 }
-                ((GameActivity)getActivity()).SetPlayers(player);
-                ((GameActivity)getActivity()).SetFragment("gaming");
             }
         });
         return view;
     }
-    public void selectReset() {
+    private void selectReset() {
         for(int i = 0; i < players.size(); i++) {
             players.get(i).selected = false;
         }

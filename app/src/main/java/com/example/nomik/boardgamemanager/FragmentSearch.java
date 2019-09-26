@@ -46,6 +46,7 @@ public class FragmentSearch extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 ((MainActivity)getActivity()).SetFragment("search_game", data.get(position).getName(), data.get(position).getGameid());
+                editText.setText("");
             }
         });
         editText.addTextChangedListener(new TextWatcher() {
@@ -133,6 +134,7 @@ public class FragmentSearch extends Fragment {
                 }, DELAY);
             }
         });
+
         return view;
     }
 
