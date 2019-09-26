@@ -162,6 +162,7 @@ public class MainActivity extends AppCompatActivity {
                             fragmentSearchGame = new FragmentSearchGame();
                             Bundle bundle = new Bundle();
                             bundle.putString("name", name);
+                            bundle.putString("id", id);
                             bundle.putString("year", year);
                             bundle.putString("minplaytime", minplaytime);
                             bundle.putString("maxplaytime", maxplaytime);

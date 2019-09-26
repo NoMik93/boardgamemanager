@@ -1,6 +1,6 @@
 package com.example.nomik.boardgamemanager;
 
-public class FragmentSearchData {
+public class FragmentSearchData{
     private String name;
     private String gameid;
     private String year;
@@ -37,7 +37,8 @@ public class FragmentSearchData {
         gameid = _gameid;
     }
 
-    void  setYear(String _year) {
+    void setYear(String _year) {
         year = _year;
     }
+
 }

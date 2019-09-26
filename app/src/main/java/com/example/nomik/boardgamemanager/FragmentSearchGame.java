@@ -1,5 +1,6 @@
 package com.example.nomik.boardgamemanager;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -10,6 +11,7 @@ import android.text.method.ScrollingMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -50,6 +52,16 @@ public class FragmentSearchGame extends Fragment {
             textView = view.findViewById(R.id.search_game_description);
             textView.setText("게임 설명: " + getArguments().getString("description").replace("<br/>", "\n"));
             textView.setMovementMethod(new ScrollingMovementMethod());
+            ImageButton imageButton = view.findViewById(R.id.search_game_start);
+            imageButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(getActivity(), GameActivity.class);
+                    intent.putExtra("name", getArguments().getString("name"));
+                    intent.putExtra("id", getArguments().getString("id"));
+                    startActivity(intent);
+                }
+            });
 
             Thread thread = new Thread(new Runnable() {
                 @Override
