@@ -50,14 +50,14 @@
         android:text="" />
 
     <TextView
-        android:id="@+id/textview3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/textview2"
-        android:layout_marginTop="26dp"
-        android:layout_alignLeft="@+id/textview2"
+    android:id="@+id/textview3"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_below="@+id/textview2"
+    android:layout_marginTop="26dp"
+    android:layout_alignLeft="@+id/textview2"
 
-        android:text="참여자" />
+    android:text="참여자" />
 
     <EditText
         android:id="@+id/edittext3"
@@ -69,6 +69,28 @@
         android:ems="10"
         android:inputType="textPersonName"
         android:text="" />
+
+    <TextView
+        android:id="@+id/textview4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textview3"
+        android:layout_marginTop="26dp"
+        android:layout_alignLeft="@+id/textview3"
+
+        android:text="날짜" />
+
+    <EditText
+        android:id="@+id/edittext4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/edittext3"
+        android:layout_alignStart="@+id/edittext3"
+        android:layout_below="@+id/edittext3"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:text="" />
+
     <Button
         android:id="@+id/button2"
         android:layout_width="wrap_content"
@@ -82,9 +104,9 @@
         android:id="@+id/button1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignEnd="@+id/edittext3"
-        android:layout_alignRight="@+id/edittext2"
-        android:layout_below="@+id/edittext2"
+        android:layout_alignEnd="@+id/edittext4"
+        android:layout_alignRight="@+id/edittext4"
+        android:layout_below="@+id/edittext4"
         android:layout_marginTop="60dp"
         android:text="완료" />
 

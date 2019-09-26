@@ -99,6 +99,9 @@ public class FragmentMap extends Fragment implements OnMapReadyCallback, GoogleM
     private Context context;
     TextView textView;
     Button button;
+    private int id1;
+    private int id2;
+    private String[] splitText= null;
 
 
     public FragmentMap() {
@@ -132,6 +135,8 @@ public class FragmentMap extends Fragment implements OnMapReadyCallback, GoogleM
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
+        id1 = 1;  // 주최자 일시만 모임 열기가능 1일때: 주최차 ,0일때 : 참여자
+        id2 = 0;// 정보눌렸을 때 참여자일시 버튼 삭제 완료 버튼 비활성
         Log.d("Map", "지도 준비됨");
         map = googleMap;
         map.getUiSettings().setZoomControlsEnabled(true);
@@ -139,55 +144,64 @@ public class FragmentMap extends Fragment implements OnMapReadyCallback, GoogleM
         map.setOnMyLocationButtonClickListener(this);
         map.setOnMyLocationClickListener(this);
 
-        // 맵 클릭 리스너 설정
-        map.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
-            @Override
-            public void onMapClick(final LatLng latLng) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                LayoutInflater inflater = getLayoutInflater();
-                final View view = inflater.inflate(R.layout.info, null);
-                builder.setView(view);
-                final Button button_submit = (Button) view.findViewById(R.id.button1);
-                final EditText editText1 = (EditText) view.findViewById(R.id.edittext1);
-                final EditText editText2 = (EditText) view.findViewById(R.id.edittext2);
-                final EditText editText3 = (EditText) view.findViewById(R.id.edittext3);
+        if(id1 == 0)
+        {
+            // 맵 클릭 리스너 설정
+            map.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+                @Override
+                public void onMapClick(final LatLng latLng) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                    LayoutInflater inflater = getLayoutInflater();
+                    final View view = inflater.inflate(R.layout.info, null);
+                    builder.setView(view);
+                    final Button button_submit = (Button) view.findViewById(R.id.button1);
+                    final EditText editText1 = (EditText) view.findViewById(R.id.edittext1);
+                    final EditText editText2 = (EditText) view.findViewById(R.id.edittext2);
+                    final EditText editText3 = (EditText) view.findViewById(R.id.edittext3);
+                    final EditText editText4 = (EditText) view.findViewById(R.id.edittext4);
 
 
-                final AlertDialog dialog = builder.create();
-                button_submit.setOnClickListener(new View.OnClickListener() {
-                    public void onClick(View v) {
-                        String string_editText1 = editText1.getText().toString();
-                        String string_editText2 = editText2.getText().toString();
-                        String string_editText3 = editText3.getText().toString();
-                        //Toast.makeText(context, string_placeTitle+"\n"+string_placeDesc,Toast.LENGTH_SHORT).show();
+
+                    final AlertDialog dialog = builder.create();
+                    button_submit.setOnClickListener(new View.OnClickListener() {
+                        public void onClick(View v) {
+                            String string_editText1 = editText1.getText().toString();
+                            String string_editText2 = editText2.getText().toString();
+                            String string_editText3 = editText3.getText().toString();
+                            String string_editText4 = editText4.getText().toString();
+
+                            //Toast.makeText(context, string_placeTitle+"\n"+string_placeDesc,Toast.LENGTH_SHORT).show();
 
 
-                        MarkerOptions markerOptions = new MarkerOptions();
-                        markerOptions.position(latLng);
-                        markerOptions.title(string_editText1);
-                        markerOptions.snippet("인원 수 :"+string_editText2+", 구성원 :"+string_editText3);
-                        markerOptions.draggable(true);
-                        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+                            MarkerOptions markerOptions = new MarkerOptions();
+                            markerOptions.position(latLng);
+                            markerOptions.title(string_editText1);
+                            markerOptions.snippet(string_editText2+", "+string_editText3+", "+string_editText4);
+                            markerOptions.draggable(true);
+                            markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
 
-                        map.addMarker(markerOptions);
+                            map.addMarker(markerOptions);
 
-                        dialog.dismiss();
-                    }
-                });
+                            dialog.dismiss();
+                        }
+                    });
 
-                dialog.show();
+                    dialog.show();
 
-            }
-        });
-
+                }
+            });
+        }
         // infoWindwow 클릭 리스너 설정
         map.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
             @Override
             public void onInfoWindowClick(final Marker marker) {
+
                 // 마커 정보 가져오기
                 String title = marker.getTitle();
                 String snippet = marker.getSnippet();
+                String[] splitText = snippet.split(", ");
                 // snippet 자르기 ", "
+
 
                 LayoutInflater inflater = getLayoutInflater();
                 AlertDialog.Builder builder = new AlertDialog.Builder(context);
@@ -198,21 +212,47 @@ public class FragmentMap extends Fragment implements OnMapReadyCallback, GoogleM
                 final EditText editText1 = (EditText) view.findViewById(R.id.edittext1);
                 final EditText editText2 = (EditText) view.findViewById(R.id.edittext2);
                 final EditText editText3 = (EditText) view.findViewById(R.id.edittext3);
+                final EditText editText4 = (EditText) view.findViewById(R.id.edittext4);
+
+
+
+                // 참여자는 버튼 비활성, 주최자는 모임 수정및 삭제 가능능
+
+                if(id2 == 0)
+                {
+
+                    button_submit.setEnabled(false);
+                    button_delete.setEnabled(false);
+                }
+                else
+                {
+                    button_submit.setEnabled(true);
+                    button_delete.setEnabled(true);
+
+                }
+
+
+
                 editText1.setText(title);
-                //editText2.setText(words[0]);
-                //editText3.setText(words[1]);
+                editText2.setText(splitText[0]);
+                editText3.setText(splitText[1]);
+                editText4.setText(splitText[2]);
 
                 final AlertDialog dialog = builder.create();
+
                 button_submit.setOnClickListener(new View.OnClickListener() {
                     public void onClick(View v) {
 
                         String string_editText1 = editText1.getText().toString();
                         String string_editText2 = editText2.getText().toString();
                         String string_editText3 = editText3.getText().toString();
+                        String string_editText4 = editText4.getText().toString();
+
+
                         //Toast.makeText(context, string_placeTitle+"\n"+string_placeDesc,Toast.LENGTH_SHORT).show();
 
                         marker.setTitle(string_editText1);
-                        marker.setSnippet("인원 수 :"+string_editText2+", 구성원 :"+string_editText3);
+                        marker.setSnippet(string_editText2+", "+string_editText3+", "+string_editText4);
 
                         dialog.dismiss();
                         marker.showInfoWindow();
@@ -227,11 +267,16 @@ public class FragmentMap extends Fragment implements OnMapReadyCallback, GoogleM
                 dialog.show();
             }
         });
+
+
+
+
+
         map.addMarker(new MarkerOptions().position(curPoint).title("내위치")).showInfoWindow();
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(curPoint, 15));
         oneMarker();
         twoMarker();
-        threeMarker();
+
         //map.addMarker(new MarkerOptions().position(curPoint2).title("모임1")).showInfoWindow();
         //googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(curPoint2 , 15));
         //map.addMarker(new MarkerOptions().position(curPoint3).title("모임2")).showInfoWindow();
@@ -276,7 +321,7 @@ public class FragmentMap extends Fragment implements OnMapReadyCallback, GoogleM
         makerOptions
                 .position(seoul)
                 .title("모임1.")
-                .snippet("4명, 유동국")
+                .snippet("4명, 동국1,동국2,동국3,동국4, 9/26")
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
                 .alpha(0.5f);
 
@@ -295,7 +340,7 @@ public class FragmentMap extends Fragment implements OnMapReadyCallback, GoogleM
         makerOptions
                 .position(seoul)
                 .title("모임2.")
-                .snippet("참여인원:2명")
+                .snippet("5명, a,b,c,d,e, 9/11")
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
                 .alpha(0.5f);
 
@@ -304,22 +349,7 @@ public class FragmentMap extends Fragment implements OnMapReadyCallback, GoogleM
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(seoul, 16));
 
     }
-    public void threeMarker() {
-        LatLng seoul = new LatLng(37.619808, 127.057560);
 
-        MarkerOptions makerOptions = new MarkerOptions();
-        makerOptions
-                .position(seoul)
-                .title("모임2.")
-                .snippet("참여인원:2명")
-                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
-                .alpha(0.5f);
-
-
-        map.addMarker(makerOptions).showInfoWindow(); //.showInfoWindow();
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(seoul, 16));
-
-    }
 
 
 
