@@ -94,9 +94,10 @@ public class FragmentSearchGame extends Fragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(requestCode == 0) {
-            if(resultCode == RESULT_OK)
-
-                ((MainActivity)getActivity()).SetFragment("game");
+            if(resultCode == RESULT_OK) {
+                ((MainActivity) getActivity()).FragmentGameUpdate();
+                ((MainActivity) getActivity()).SetFragment("game");
+            }
         }
     }
 }

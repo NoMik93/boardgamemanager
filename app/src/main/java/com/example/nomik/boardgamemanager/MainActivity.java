@@ -99,6 +99,10 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public void FragmentGameUpdate() {
+        fragmentGame = new FragmentGame();
+    }
+
     public void SetFragment(String fragmentname, String _name, String _id) {
         final String name = _name;
         final String id = _id;

@@ -4,11 +4,36 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:gravity="center">
+    android:gravity="center"
+    android:weightSum="2">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="fragment game"/>
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:padding="5dp">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+            <com.github.mikephil.charting.charts.PieChart android:id="@+id/chart_MyWinRate"
+                android:layout_width="240dp"
+                android:layout_height="match_parent">
+            </com.github.mikephil.charting.charts.PieChart>
+            <com.github.mikephil.charting.charts.PieChart android:id="@+id/chart_GameRate"
+                android:layout_width="240dp"
+                android:layout_height="match_parent">
+            </com.github.mikephil.charting.charts.PieChart>
+            <com.github.mikephil.charting.charts.PieChart android:id="@+id/chart_AllWinRate"
+                android:layout_width="240dp"
+                android:layout_height="match_parent">
+            </com.github.mikephil.charting.charts.PieChart>
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <ListView android:id="@+id/listView_game"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
 
 </LinearLayout>

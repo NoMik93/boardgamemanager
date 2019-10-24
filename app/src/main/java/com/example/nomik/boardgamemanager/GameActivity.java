@@ -11,7 +11,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 
 public class GameActivity extends AppCompatActivity {
-    private String name;
+    private String gameName;
     private String gameID;
     private ArrayList<String> players;
     private ArrayList<Integer> score;
@@ -23,11 +23,11 @@ public class GameActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
         Intent intent = getIntent();
-        name = intent.getStringExtra("name");
+        gameName = intent.getStringExtra("name");
         gameID = intent.getStringExtra("id");
 
         textViewTitle = findViewById(R.id.textview_game_name);
-        textViewTitle.setText(name);
+        textViewTitle.setText(gameName);
         textViewTitle = findViewById(R.id.textview_game_title);
         SetFragment("contact");
     }
@@ -69,5 +69,14 @@ public class GameActivity extends AppCompatActivity {
 
     public ArrayList<String> getPlayers(){
         return players;
+    }
+    public String getGameID(){
+        return gameID;
+    }
+    public String getGameName(){
+        return gameName;
+    }
+    public String getTime(){
+        return time;
     }
 }
