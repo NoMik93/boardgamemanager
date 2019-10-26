@@ -1,50 +1,108 @@
 package com.example.nomik.boardgamemanager;
 
-//import android.app.Activity;
-import android.content.Context;
+import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.Toast;
 
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlPullParserFactory;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-
-//import android.graphics.Bitmap;
-//import android.graphics.BitmapFactory;
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
-    FragmentSearch fragmentSearch;
-    FragmentSearchGame fragmentSearchGame;
-    FragmentGame fragmentGame;
-    FragmentMap fragmentMap;
-    Context context;
+    private FragmentSearch fragmentSearch;
+    private FragmentSearchGame fragmentSearchGame;
+    private FragmentGame fragmentGame;
+    private FragmentMap fragmentMap;
+    private String myName;
+    private ArrayList<FragmentSearchData> recentSearch = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        SharedPreferences sp = getSharedPreferences("bgm", MODE_PRIVATE);
+        myName = sp.getString("name", "");
+        try {
+            JSONArray jsonArray = new JSONArray(sp.getString("recentSearch", "[]"));
+            for(int i = 0; i < jsonArray.length(); i++) {
+                JSONObject jsonObject = jsonArray.getJSONObject(i);
+                FragmentSearchData fragmentSearchData = new FragmentSearchData(jsonObject.getString("name"), jsonObject.getString("id"));
+                recentSearch.add(fragmentSearchData);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        ImageButton imageButton = findViewById(R.id.button_personal);
+        imageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                builder.setTitle("프로필 설정");
+                final EditText editText = new EditText(MainActivity.this);
+                editText.setText(myName);
+                builder.setView(editText);
+                builder.setPositiveButton("확인", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        myName = editText.getText().toString();
+                        dialogInterface.dismiss();
+                    }
+                });
+                builder.setNegativeButton("취소", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.dismiss();
+                    }
+                });
+                AlertDialog alertDialog = builder.create();
+                alertDialog.show();
+            }
+        });
 
         fragmentSearch = new FragmentSearch();
         fragmentSearchGame = new FragmentSearchGame();
         fragmentGame = new FragmentGame();
         fragmentMap = new FragmentMap();
-
-        context = this;
-
-
-        android.support.v4.app.FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
         fragmentTransaction.replace(R.id.fragment_frame, fragmentSearch).commit();
+    }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        SharedPreferences sp = getSharedPreferences("bgm", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sp.edit();
+        JSONArray jsonArray = new JSONArray();
+        for (int i = 0; i < recentSearch.size(); i++) {
+            JSONObject jsonObject = new JSONObject();
+            try {
+                jsonObject.put("name", recentSearch.get(i).getName());
+                jsonObject.put("id", recentSearch.get(i).getGameid());
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            jsonArray.put(jsonObject);
+        }
+        editor.putString("name", myName);
+        editor.putString("recentSearch", jsonArray.toString());
+        editor.commit();
     }
 
     public void onClickMenuButton(View view) {
@@ -122,49 +180,52 @@ public class MainActivity extends AppCompatActivity {
                             String imageurl = null;
                             String publisher = null;
                             String description = null;
-                            URL url= new URL("https://www.boardgamegeek.com/xmlapi/boardgame/" + id + "?stats=1");
+                            String urlString = "http://192.168.0.174:8080/bgm/DBConnection";
+                            URL url = new URL(urlString);
+                            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
-                            XmlPullParserFactory xmlPullParserFactory = XmlPullParserFactory.newInstance();
-                            XmlPullParser parser = xmlPullParserFactory.newPullParser();
-                            InputStream inputStream = url.openStream();
-                            parser.setInput(new InputStreamReader(inputStream));
+                            conn.setReadTimeout(3000);
+                            conn.setConnectTimeout(3000);
+                            conn.setRequestMethod("POST");
+                            conn.setDoInput(true);
+                            conn.setDoOutput(true);
+                            conn.setRequestProperty("mode", "search");
+                            conn.setRequestProperty("id", id);
+                            conn.setRequestProperty("Content-Type", "application/json; charset=EUC-KR");
+                            conn.setRequestProperty("Accept", "application/json");
 
-                            int eventType = parser.getEventType();
-                            while (eventType != XmlPullParser.END_DOCUMENT) {
-                                if (eventType == XmlPullParser.START_TAG) {
-                                    String startTag = parser.getName();
-                                    if(startTag.equals("yearpublished")) {
-                                        year = parser.nextText();
-                                    }
-                                    if(startTag.equals("minplaytime")) {
-                                        minplaytime = parser.nextText();
-                                    }
-                                    if(startTag.equals("maxplaytime")) {
-                                        maxplaytime = parser.nextText();
-                                    }
-                                    if(startTag.equals("minplayers")) {
-                                        minplayer = parser.nextText();
-                                    }
-                                    if(startTag.equals("maxplayers")) {
-                                        maxplayer = parser.nextText();
-                                    }
-                                    if(startTag.equals("age")) {
-                                        age = parser.nextText();
-                                    }
-                                    if(startTag.equals("image")) {
-                                        imageurl = parser.nextText();
-                                    }
-                                    if(startTag.equals("boardgamepublisher")) {
-                                        publisher = parser.nextText();
-                                    }
-                                    if(startTag.equals("description")) {
-                                        description = parser.nextText();
-                                    }
+                            OutputStreamWriter osw = new OutputStreamWriter(conn.getOutputStream(), "EUC-KR");
+                            osw.write(name);
+                            osw.close();
+
+                            int responseCode = conn.getResponseCode();
+                            if (responseCode == HttpURLConnection.HTTP_OK) {
+                                InputStream is = conn.getInputStream();
+                                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                                byte[] byteBuffer = new byte[1024];
+                                byte[] byteData = null;
+                                int length = 0;
+                                while ((length = is.read(byteBuffer, 0, byteBuffer.length)) != -1) {
+                                    baos.write(byteBuffer, 0, length);
                                 }
-                                eventType = parser.next();
+                                byteData = baos.toByteArray();
+                                String responseString = new String(byteData);
+                                JSONObject jsonObject = new JSONObject(responseString);
+                                year = jsonObject.getString("year");
+                                minplaytime = jsonObject.getString("playTimeMin");
+                                maxplaytime = jsonObject.getString("playTimeMax");
+                                minplayer = jsonObject.getString("playerNumMin");
+                                maxplayer = jsonObject.getString("playerNumMax");
+                                age = jsonObject.getString("age");
+                                imageurl = jsonObject.getString("imageURL");
+                                publisher = jsonObject.getString("publisher");
+                                description = jsonObject.getString("description");
+                            } else {
+                                Toast.makeText(MainActivity.this, "서버에 연결할 수 없습니다.", Toast.LENGTH_SHORT).show();
                             }
                             fragmentSearchGame = new FragmentSearchGame();
                             Bundle bundle = new Bundle();
+                            bundle.putString("myName", myName);
                             bundle.putString("name", name);
                             bundle.putString("id", id);
                             bundle.putString("year", year);
@@ -179,11 +240,11 @@ public class MainActivity extends AppCompatActivity {
                             fragmentSearchGame.setArguments(bundle);
                         } catch (UnsupportedEncodingException e) {
                             e.printStackTrace();
-                        } catch (XmlPullParserException e) {
-                            e.printStackTrace();
                         } catch (MalformedURLException e) {
                             e.printStackTrace();
                         } catch (IOException e) {
+                            e.printStackTrace();
+                        } catch (JSONException e) {
                             e.printStackTrace();
                         }
                     }
@@ -198,5 +259,25 @@ public class MainActivity extends AppCompatActivity {
                 break;
             }
         }
+    }
+
+    public String getMyName(){
+        return myName;
+    }
+
+    public void addRecentSearch(String name, String id) {
+        FragmentSearchData fragmentSearchData = new FragmentSearchData(name, id);
+        if(!recentSearch.contains(fragmentSearchData)) {
+            if(recentSearch.size() < 5) {
+                recentSearch.add(fragmentSearchData);
+            } else {
+                recentSearch.remove(0);
+                recentSearch.add(fragmentSearchData);
+            }
+        }
+    }
+
+    public ArrayList<FragmentSearchData> getRecentSearch() {
+        return recentSearch;
     }
 }

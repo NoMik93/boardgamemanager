@@ -11,6 +11,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 
 public class GameActivity extends AppCompatActivity {
+    private String myName;
     private String gameName;
     private String gameID;
     private ArrayList<String> players;
@@ -23,6 +24,7 @@ public class GameActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
         Intent intent = getIntent();
+        myName = intent.getStringExtra("myName");
         gameName = intent.getStringExtra("name");
         gameID = intent.getStringExtra("id");
 
@@ -79,4 +81,5 @@ public class GameActivity extends AppCompatActivity {
     public String getTime(){
         return time;
     }
+    public String getMyName() { return myName; }
 }

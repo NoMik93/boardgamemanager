@@ -1,5 +1,7 @@
 package com.example.nomik.boardgamemanager;
 
+import androidx.annotation.Nullable;
+
 public class FragmentSearchData{
     private String name;
     private String gameid;
@@ -9,6 +11,11 @@ public class FragmentSearchData{
         name = "검색 결과가 없습니다.";
         gameid = "0";
         year = "1900";
+    }
+
+    FragmentSearchData(String _name, String _gameid) {
+        name = _name;
+        gameid = _gameid;
     }
 
     FragmentSearchData(String _name, String _gameid, String _year) {
@@ -41,4 +48,10 @@ public class FragmentSearchData{
         year = _year;
     }
 
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        if(obj.getClass() == FragmentSearchData.class)
+            return name.equals(((FragmentSearchData)obj).getName());
+        return super.equals(obj);
+    }
 }

@@ -13,13 +13,21 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Toast;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
+
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -33,18 +41,25 @@ import java.util.regex.Pattern;
 public class FragmentSearch extends Fragment {
     EditText editText;
     ListView search_ListView;
+    ListView recent_ListView;
+    ListView realTime_ListView;
     String url_String;
     ArrayList<FragmentSearchData> data = new ArrayList<>();
+    ArrayList<FragmentSearchData> recentData = new ArrayList<>();
+    ArrayList<FragmentSearchData> realTimeData = new ArrayList<>();
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         ViewGroup view = (ViewGroup) inflater.inflate(R.layout.fragment_search, container, false);
         editText = view.findViewById(R.id.editText_search);
         search_ListView = view.findViewById(R.id.search_ListView);
+        recent_ListView = view.findViewById(R.id.search_recent_ListView);
+        realTime_ListView = view.findViewById(R.id.search_RealTime_ListView);
 
         search_ListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                ((MainActivity)getActivity()).addRecentSearch(data.get(position).getName(), data.get(position).getGameid());
                 ((MainActivity)getActivity()).SetFragment("search_game", data.get(position).getName(), data.get(position).getGameid());
                 editText.setText("");
             }
@@ -56,50 +71,7 @@ public class FragmentSearch extends Fragment {
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) { // editText에 글자가 입력될 때
-                /*if (Pattern.matches("^[가-힣][가-힣]+.*$", s)) { // 한글 2글자 이상으로 시작되면
-                    url_String = "https://www.boardgamegeek.com/xmlapi/search?search=" + s;
-                    Thread thread = new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            searchString(url_String);
-                        }
-                    });
-                    thread.start();
-                    try {
-                        thread.join();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    sortData(s.toString());
-                    FragmentSearchAdapter fragmentSearchAdapter = new FragmentSearchAdapter(data);
-                    fragmentSearchAdapter.notifyDataSetChanged();
-                    search_ListView.setAdapter(fragmentSearchAdapter);
-                } else if (Pattern.matches("^[a-zA-Z0-9]..+$", s)) { // 영어나 숫자는 3글자 이상으로 시작되면
-                    url_String = "https://www.boardgamegeek.com/xmlapi/search?search=" + s;
-                    Thread thread =  new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            searchString(url_String);
-                        }
-                    });
-                    thread.start();
-                    try {
-                        thread.join();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    sortData(s.toString());
-                    FragmentSearchAdapter fragmentSearchAdapter = new FragmentSearchAdapter(data);
-                    fragmentSearchAdapter.notifyDataSetChanged();
-                    search_ListView.setAdapter(fragmentSearchAdapter);
-                } else {
-                    data.clear();
-                    FragmentSearchAdapter fragmentSearchAdapter = new FragmentSearchAdapter(data);
-                    fragmentSearchAdapter.notifyDataSetChanged();
-                    search_ListView.setAdapter(fragmentSearchAdapter);
-                }*/
-            }
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
 
             @Override
             public void afterTextChanged(final Editable s) {
@@ -124,14 +96,50 @@ public class FragmentSearch extends Fragment {
                         sortData(s.toString());
                         final FragmentSearchAdapter fragmentSearchAdapter = new FragmentSearchAdapter(data);
                         fragmentSearchAdapter.notifyDataSetChanged();
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                search_ListView.setAdapter(fragmentSearchAdapter);
-                            }
-                        });
+                        try {
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    search_ListView.setAdapter(fragmentSearchAdapter);
+                                }
+                            });
+                        } catch (NullPointerException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }, DELAY);
+            }
+        });
+
+        recentData = ((MainActivity)getActivity()).getRecentSearch();
+        FragmentSearchRecentAdapter fragmentSearchRecentAdapter = new FragmentSearchRecentAdapter(recentData);
+        fragmentSearchRecentAdapter.notifyDataSetChanged();
+        recent_ListView.setAdapter(fragmentSearchRecentAdapter);
+        recent_ListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                ((MainActivity)getActivity()).SetFragment("search_game", recentData.get(i).getName(), recentData.get(i).getGameid());
+            }
+        });
+        Thread thread = new Thread(){
+            @Override
+            public void run() {
+                setRealTimeData();
+            }
+        };
+        thread.start();
+        try {
+            thread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        FragmentSearchRecentAdapter fragmentSearchRealTimeAdapter = new FragmentSearchRecentAdapter(realTimeData);
+        fragmentSearchRealTimeAdapter.notifyDataSetChanged();
+        realTime_ListView.setAdapter(fragmentSearchRealTimeAdapter);
+        realTime_ListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                ((MainActivity)getActivity()).SetFragment("search_game", realTimeData.get(i).getName(), realTimeData.get(i).getGameid());
             }
         });
 
@@ -210,5 +218,56 @@ public class FragmentSearch extends Fragment {
             }
         });
 
+    }
+
+    public void setRealTimeData() {
+        realTimeData.clear();
+        try {
+            String urlString = "http://192.168.0.174:8080/bgm/DBConnection";
+            URL url = new URL(urlString);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+
+            conn.setReadTimeout(3000);
+            conn.setConnectTimeout(3000);
+            conn.setRequestMethod("POST");
+            conn.setDoInput(true);
+            conn.setDoOutput(true);
+            conn.setRequestProperty("mode", "getRealTimeSearch");
+            conn.setRequestProperty("Content-Type", "application/json; charset=EUC-KR");
+            conn.setRequestProperty("Accept", "application/json");
+
+            int responseCode = conn.getResponseCode();
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                InputStream is = conn.getInputStream();
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                byte[] byteBuffer = new byte[1024];
+                byte[] byteData = null;
+                int length = 0;
+                while ((length = is.read(byteBuffer, 0, byteBuffer.length)) != -1) {
+                    baos.write(byteBuffer, 0, length);
+                }
+                byteData = baos.toByteArray();
+                String responseString = new String(byteData);
+                JSONArray jsonArray= new JSONArray(responseString);
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    JSONObject game = jsonArray.getJSONObject(i);
+                    FragmentSearchData fragmentSearchData = new FragmentSearchData(game.getString("name"), game.getString("id"));
+                    realTimeData.add(fragmentSearchData);
+                }
+            } else {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(getContext(), "서버에 연결할 수 없습니다.", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 }

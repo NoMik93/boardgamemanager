@@ -22,7 +22,7 @@ public class ContactActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_contact);
         data = getContactList();
-        ContactAdapter contactAdapter = new ContactAdapter(data);
+        ContactAddAdapter contactAdapter = new ContactAddAdapter(data);
         contactAdapter.notifyDataSetChanged();
         final ListView listView = findViewById(R.id.contact_ListView);
         listView.setAdapter(contactAdapter);

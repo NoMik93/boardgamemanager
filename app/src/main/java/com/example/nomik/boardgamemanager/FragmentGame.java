@@ -47,7 +47,7 @@ public class FragmentGame extends Fragment {
     PieChart gameChart;
     PieChart aWinChart;
     int mWinGameNum = 0;
-    String name = "기본사진";
+    String myName;
 
     private class Game implements Comparable<Game> {
         private String name;
@@ -107,10 +107,12 @@ public class FragmentGame extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         ViewGroup view = (ViewGroup) inflater.inflate(R.layout.fragment_game, container, false);
+        myName = ((MainActivity)getActivity()).getMyName();
         listView = view.findViewById(R.id.listView_game);
         mWinChart = view.findViewById(R.id.chart_MyWinRate);
         gameChart = view.findViewById(R.id.chart_GameRate);
         aWinChart = view.findViewById(R.id.chart_AllWinRate);
+        data = new ArrayList<>();
         mWinGameNum = 0;
         Thread thread = new Thread() {
             @Override
@@ -118,6 +120,12 @@ public class FragmentGame extends Fragment {
             }
         };
         thread.start();
+        try {
+            thread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        SetChart();
         return view;
     }
     private void getGameData() {
@@ -131,7 +139,7 @@ public class FragmentGame extends Fragment {
             conn.setRequestMethod("POST");
             conn.setDoInput(true);
             conn.setDoOutput(true);
-            conn.setRequestProperty("mode", "getGameData");
+            conn.setRequestProperty("mode", "getGameRecord");
             conn.setRequestProperty("phoneNumber", getPhoneNumber());
             conn.setRequestProperty("Content-Type", "application/json; charset=EUC-KR");
             conn.setRequestProperty("Accept", "application/json");
@@ -167,7 +175,7 @@ public class FragmentGame extends Fragment {
                         list.add(new Player(player.getString("playerName"), player.getInt("score")));
                     }
                     Collections.sort(list);
-                    if(list.get(0).getName().equals(name)) {
+                    if(list.get(0).getName().equals(myName)) {
                         mWinGameNum++;
                     }
                     if(playerList.contains(list.get(0))) {
@@ -200,13 +208,13 @@ public class FragmentGame extends Fragment {
                 listView.setAdapter(fragmentGameAdapter);
             }
         });
-        Collections.sort(gameList);
-        Collections.sort(playerList);
-        SetChart();
     }
 
     private void SetChart() {
+        Collections.sort(gameList);
+        Collections.sort(playerList);
         mWinChart.setUsePercentValues(true);
+        //mWinChart.getLegend().setEnabled(false);
         ArrayList<PieEntry> mwEntry = new ArrayList<>();
         mwEntry.add(new PieEntry(mWinGameNum, "승"));
         mwEntry.add((new PieEntry((data.size() - mWinGameNum), "패")));
@@ -221,6 +229,7 @@ public class FragmentGame extends Fragment {
         PieData mwData = new PieData(mwDataSet);
         mwData.setValueTextSize(15f);
         mwData.setValueTextColor(Color.BLACK);
+        mWinChart.setEntryLabelColor(Color.BLACK);
         mWinChart.setData(mwData);
 
         gameChart.setUsePercentValues(true);
@@ -233,13 +242,14 @@ public class FragmentGame extends Fragment {
         gDescription.setText("게임별 비율");
         gDescription.setTextSize(15);
         gameChart.setDescription(gDescription);
-        PieDataSet gDataSet = new PieDataSet(gEntry, "게임명");
+        PieDataSet gDataSet = new PieDataSet(gEntry, "");
         gDataSet.setSliceSpace(3f);
         gDataSet.setSelectionShift(5f);
         gDataSet.setColors(ColorTemplate.COLORFUL_COLORS);
         PieData gData = new PieData(gDataSet);
         gData.setValueTextSize(15f);
         gData.setValueTextColor(Color.BLACK);
+        gameChart.setEntryLabelColor(Color.BLACK);
         gameChart.setData(gData);
 
         aWinChart.setUsePercentValues(true);
@@ -249,16 +259,17 @@ public class FragmentGame extends Fragment {
             awEntry.add(p);
         }
         Description awDescription = new Description();
-        awDescription.setText("승리자 비율");
+        awDescription.setText("전체 승률");
         awDescription.setTextSize(15);
         aWinChart.setDescription(awDescription);
-        PieDataSet awDataSet = new PieDataSet(awEntry, "게임명");
+        PieDataSet awDataSet = new PieDataSet(awEntry, "");
         awDataSet.setSliceSpace(3f);
         awDataSet.setSelectionShift(5f);
         awDataSet.setColors(ColorTemplate.MATERIAL_COLORS);
         PieData awData = new PieData(awDataSet);
         awData.setValueTextSize(15f);
         awData.setValueTextColor(Color.BLACK);
+        aWinChart.setEntryLabelColor(Color.BLACK);
         aWinChart.setData(awData);
     }
     private void setChart(PieChart pieChart){

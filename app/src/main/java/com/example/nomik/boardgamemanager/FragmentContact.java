@@ -51,6 +51,13 @@ public class FragmentContact extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         ViewGroup view = (ViewGroup) inflater.inflate(R.layout.fragment_contact, container, false);
         listView = view.findViewById(R.id.listView_contact_selected);
+        ContactItem contactItem = new ContactItem();
+        contactItem.name = ((GameActivity)getActivity()).getMyName();
+        players.add(contactItem);
+        ContactAdapter contactAdapter = new ContactAdapter(players);
+        contactAdapter.notifyDataSetChanged();
+        listView.setAdapter(contactAdapter);
+
         ImageButton imageButton = view.findViewById(R.id.button_contact_add_from_contact);
         imageButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -98,12 +105,12 @@ public class FragmentContact extends Fragment {
             public void onClick(View view) {
                 ArrayList<ContactItem> temp = new ArrayList<>();
                 for(int i = 0; i < players.size(); i++) {
-                    if(!players.get(i).selected) {
+                    if (!players.get(i).selected) {
                         temp.add(players.get(i));
                     }
-                    players.clear();
-                    players.addAll(temp);
                 }
+                players.clear();
+                players.addAll(temp);
                 ContactAdapter contactAdapter = new ContactAdapter(players);
                 contactAdapter.notifyDataSetChanged();
                 listView.setAdapter(contactAdapter);

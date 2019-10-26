@@ -1,6 +1,9 @@
 package com.example.nomik.boardgamemanager;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,7 +38,7 @@ public class FragmentGameAdapter extends BaseAdapter {
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(final int position, View convertView, final ViewGroup parent) {
         if (convertView == null) {
             final Context context = parent.getContext();
             if (inflater == null)
@@ -53,6 +56,28 @@ public class FragmentGameAdapter extends BaseAdapter {
         itemText.setText(String.valueOf(data.get(position).getPlayerNum()) + "명");
         itemText = convertView.findViewById(R.id.textView_game_item_playtime);
         itemText.setText(data.get(position).getPlayTime());
+        convertView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(parent.getContext());
+                builder.setTitle(data.get(position).getGameName());
+                String message = "날짜: " + data.get(position).getDate() + ", " + data.get(position).getDateTime() + "\n";
+                message += "걸린 시간: " + data.get(position).getPlayTime() + "\n";
+                message += "플레이어:\n";
+                for(int i = 0; i < data.get(position).getPlayerNum(); i++) {
+                    message += "          " + data.get(position).getPlayerName(i) + " " + data.get(position).getPlayerScore(i) + "점\n";
+                }
+                builder.setMessage(message);
+                builder.setPositiveButton("확인", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.dismiss();
+                    }
+                });
+                AlertDialog dialog = builder.create();
+                dialog.show();
+            }
+        });
         return convertView;
     }
 }

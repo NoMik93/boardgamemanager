@@ -19,12 +19,12 @@ import android.widget.TextView;
 import java.io.InputStream;
 import java.util.ArrayList;
 
-public class ContactAdapter extends BaseAdapter {
+public class ContactAddAdapter extends BaseAdapter {
     LayoutInflater inflater = null;
     private ArrayList<ContactItem> data;
     private int nList;
 
-    public ContactAdapter(ArrayList<ContactItem> _data) {
+    public ContactAddAdapter(ArrayList<ContactItem> _data) {
         data = _data;
         nList = data.size();
     }
@@ -61,24 +61,20 @@ public class ContactAdapter extends BaseAdapter {
         ImageView imageView = view.findViewById(R.id.contact_ListView_image);
         Bitmap image = loadPhoto(context.getContentResolver(), data.get(i).person_id, data.get(i).photo_id);
         if (image != null)
-        imageView.setImageBitmap(image);
-        if (i == 0){
-            view.setBackgroundColor(Color.GRAY);
-        } else {
-            view.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if(data.get(index).selected) {
-                        view.setBackgroundColor(Color.WHITE);
-                        data.get(index).selected = false;
-                    }
-                    else {
-                        view.setBackgroundColor(Color.BLUE);
-                        data.get(index).selected = true;
-                    }
+            imageView.setImageBitmap(image);
+        view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(data.get(index).selected) {
+                    view.setBackgroundColor(Color.WHITE);
+                    data.get(index).selected = false;
                 }
-            });
-        }
+                else {
+                    view.setBackgroundColor(Color.BLUE);
+                    data.get(index).selected = true;
+                }
+            }
+        });
         return view;
     }
 
