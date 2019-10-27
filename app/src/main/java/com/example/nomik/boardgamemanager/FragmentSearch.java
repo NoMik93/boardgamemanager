@@ -148,6 +148,7 @@ public class FragmentSearch extends Fragment {
 
     public void searchString(String s)  {
         data.clear();
+        InputStream inputStream = null;
         try {
             URL url= new URL(s);
             String name = null;
@@ -156,7 +157,7 @@ public class FragmentSearch extends Fragment {
 
             XmlPullParserFactory xmlPullParserFactory = XmlPullParserFactory.newInstance();
             XmlPullParser parser = xmlPullParserFactory.newPullParser();
-            InputStream inputStream = url.openStream();
+            inputStream = url.openStream();
             parser.setInput(new InputStreamReader(inputStream));
 
             int eventType = parser.getEventType();
@@ -194,6 +195,14 @@ public class FragmentSearch extends Fragment {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            if (inputStream != null) {
+                try {
+                    inputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
@@ -222,10 +231,11 @@ public class FragmentSearch extends Fragment {
 
     public void setRealTimeData() {
         realTimeData.clear();
+        HttpURLConnection conn = null;
         try {
             String urlString = "http://192.168.0.174:8080/bgm/DBConnection";
             URL url = new URL(urlString);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn = (HttpURLConnection) url.openConnection();
 
             conn.setReadTimeout(3000);
             conn.setConnectTimeout(3000);
@@ -268,6 +278,9 @@ public class FragmentSearch extends Fragment {
             e.printStackTrace();
         } catch (JSONException e) {
             e.printStackTrace();
+        } finally {
+            if(conn != null)
+                conn.disconnect();
         }
     }
 }

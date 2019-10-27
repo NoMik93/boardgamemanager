@@ -14,14 +14,17 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.constraint.Constraints;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -43,9 +46,22 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.xmlpull.v1.XmlPullParser;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -57,240 +73,225 @@ import noman.googleplaces.PlaceType;
 import noman.googleplaces.PlacesException;
 import noman.googleplaces.PlacesListener;
 
+import static android.content.Context.TELEPHONY_SERVICE;
 import static android.support.constraint.Constraints.TAG;
 import static android.support.v4.content.ContextCompat.getSystemService;
 
 
-public class FragmentMap extends Fragment implements OnMapReadyCallback, GoogleMap.OnMyLocationButtonClickListener,
-        GoogleMap.OnMyLocationClickListener,  GoogleMap.OnMarkerClickListener {
-    private ViewGroup rootView;
-    private GoogleApiClient mGoogleApiClient;
-    //private static final LatLng DEFAULT_LOCATION = new LatLng(35.050607, 126.722983);
-    private static final int GPS_ENABLE_REQUEST_CODE = 2001;
-    private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 2002;
-    private static final int UPDATE_INTERVAL_MS = 15000;
-    private static final int FASTEST_UPDATE_INTERVAL_MS = 15000;
+public class FragmentMap extends Fragment implements OnMapReadyCallback, GoogleMap.OnMyLocationButtonClickListener, GoogleMap.OnMyLocationClickListener, GoogleMap.OnMarkerClickListener {
     private static final LatLng curPoint = new LatLng(37.619395, 127.058998); // 현재 위치 광운대
-    private static final LatLng curPoint2 = new LatLng(37.619715, 127.059909); // 모임 1 비마관
-    private static final LatLng curPoint3 = new LatLng(37.620760, 127.056959); // 모임 2 한울관
-    private static final LatLng curPoint4 = new LatLng(37.619808, 127.057560); // 모임 3 문화관
-
-
-
-    final static double mLatitude = 37.513111;   //위도
-    final static double mLongitude = 127.102669;  //경도
-    GoogleMap.OnMarkerClickListener markerClickListener;
-
-
-    private GoogleMap map;
     private MapView mapView = null;
     private GoogleApiClient googleApiClient = null;
-    private Marker currentMarker = null;
-    private MapFragment mapFragment;
-    MarkerOptions myLocationMaker;
+    private GoogleMap map;
 
-    List<Marker> previous_marker = null;
-    private final static int MAXENTRIES = 5;
-    private String[] LikelyPlaceNames = null;
-    private String[] LikelyAddresses = null;
-    private String[] LikelyAttributions = null;
-    private LatLng[] LikelyLatLngs = null;
-    private AdaptiveIconDrawable inflater;
     private Context context;
-    TextView textView;
-    Button button;
-    private int id1;
-    private int id2;
-    private String[] splitText= null;
 
+    ArrayList<MyMarker> markers = new ArrayList<>();
+    String myName;
 
-    public FragmentMap() {
+    public class MyMarker {
+        private int marker_id;
+        private String title;
+        private String date;
+        private double latitude;
+        private double longitude;
+        private String phoneNum;
+        private ArrayList<Entry> entries = new ArrayList<>();
 
+        public MyMarker(String title) {
+            this.title = title;
+        }
+
+        public MyMarker(int marker_id, String title, String date, double latitude, double longitude, String phoneNum) {
+            this.marker_id = marker_id;
+            this.title = title;
+            this.date = date;
+            this.latitude = latitude;
+            this.longitude = longitude;
+            this.phoneNum = phoneNum;
+        }
+
+        public int getId() {
+            return marker_id;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public String getDate() {
+            return date;
+        }
+
+        public double getLatitude() {
+            return latitude;
+        }
+
+        public double getLongitude() {
+            return longitude;
+        }
+
+        public String getPhoneNum() {
+            return phoneNum;
+        }
+
+        public ArrayList<Entry> getEntries() {
+            return entries;
+        }
+
+        public void addEntry(Entry entry) {
+            entries.add(entry);
+        }
+
+        public void setTitle(String title) {
+            this.title = title;
+        }
+
+        public void setDate(String date) {
+            this.date = date;
+        }
+
+        @Override
+        public boolean equals(@androidx.annotation.Nullable Object obj) {
+            return title.equals(((MyMarker) obj).getTitle());
+        }
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        //AutoPermissions.Companion.parsePermissios(this,requestCode,permissions,this);
-    }
+    public class Entry {
+        private String name;
+        private String phoneNum;
 
+        public Entry(String name, String phoneNum) {
+            this.name = name;
+            this.phoneNum = phoneNum;
+        }
 
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+        public String getName() {
+            return name;
+        }
+
+        public String getPhoneNum() {
+            return phoneNum;
+        }
     }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = (View) inflater.inflate(R.layout.fragment_map, container, false);
-        mapView = (MapView) view.findViewById(R.id.map);
+        View view = inflater.inflate(R.layout.fragment_map, container, false);
+        myName = ((MainActivity) getActivity()).getMyName();
+        mapView = view.findViewById(R.id.map);
         mapView.getMapAsync(this);
         context = container.getContext();
-
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                getMapData();
+            }
+        });
+        thread.start();
         return view;
-
-
     }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        id1 = 1;  // 주최자 일시만 모임 열기가능 1일때: 주최차 ,0일때 : 참여자
-        id2 = 0;// 정보눌렸을 때 참여자일시 버튼 삭제 완료 버튼 비활성
-        Log.d("Map", "지도 준비됨");
+        //참여자든 주최자든 지도상 클릭할시 모임 생성은 가능
         map = googleMap;
-        map.getUiSettings().setZoomControlsEnabled(true);
-        map.setMyLocationEnabled(true);
-        map.setOnMyLocationButtonClickListener(this);
-        map.setOnMyLocationClickListener(this);
+        googleMap.getUiSettings().setZoomControlsEnabled(true);
+        googleMap.setMyLocationEnabled(true);
+        googleMap.setOnMyLocationButtonClickListener(this);
+        googleMap.setOnMyLocationClickListener(this);
+        googleMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
+            @Override
+            public void onMapLongClick(final LatLng latLng) {
 
-        if(id1 == 0)
-        {
-            // 맵 클릭 리스너 설정
-            map.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
-                @Override
-                public void onMapClick(final LatLng latLng) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                    LayoutInflater inflater = getLayoutInflater();
-                    final View view = inflater.inflate(R.layout.info, null);
-                    builder.setView(view);
-                    final Button button_submit = (Button) view.findViewById(R.id.button1);
-                    final EditText editText1 = (EditText) view.findViewById(R.id.edittext1);
-                    final EditText editText2 = (EditText) view.findViewById(R.id.edittext2);
-                    final EditText editText3 = (EditText) view.findViewById(R.id.edittext3);
-                    final EditText editText4 = (EditText) view.findViewById(R.id.edittext4);
+                final double latitude = latLng.latitude;
+                final double longitude = latLng.longitude;
 
+                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                LayoutInflater inflater = getLayoutInflater();
+                View view = inflater.inflate(R.layout.alertdialog_marker, null);
+                builder.setView(view);
+                Button button_create = view.findViewById(R.id.button_marker_create);
+                Button button_cancel = view.findViewById(R.id.button_marker_cancel);
+                final EditText title = view.findViewById(R.id.editText_marker_title);
+                final EditText date = view.findViewById(R.id.editText_marker_date);
 
 
-                    final AlertDialog dialog = builder.create();
-                    button_submit.setOnClickListener(new View.OnClickListener() {
-                        public void onClick(View v) {
-                            String string_editText1 = editText1.getText().toString();
-                            String string_editText2 = editText2.getText().toString();
-                            String string_editText3 = editText3.getText().toString();
-                            String string_editText4 = editText4.getText().toString();
+                final AlertDialog dialog = builder.create();
+                button_create.setOnClickListener(new View.OnClickListener() {
+                    public void onClick(View v) {
+                        Entry entry = new Entry(myName, getPhoneNumber());
+                        final MyMarker myMarker = new MyMarker(-1, title.getText().toString(), date.getText().toString(), latitude, longitude, getPhoneNumber());
+                        myMarker.addEntry(entry);
+                        Thread thread = new Thread() {
+                            @Override
+                            public void run() {
+                                setMapData(myMarker);
+                            }
+                        };
+                        thread.start();
 
-                            //Toast.makeText(context, string_placeTitle+"\n"+string_placeDesc,Toast.LENGTH_SHORT).show();
+                        markers.add(myMarker);
 
+                        LatLng latLng = new LatLng(myMarker.getLatitude(), myMarker.getLongitude());
+                        MarkerOptions markerOptions = new MarkerOptions();
+                        markerOptions.position(latLng);
+                        markerOptions.title(myMarker.getTitle());
+                        markerOptions.draggable(true);
+                        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
 
-                            MarkerOptions markerOptions = new MarkerOptions();
-                            markerOptions.position(latLng);
-                            markerOptions.title(string_editText1);
-                            markerOptions.snippet(string_editText2+", "+string_editText3+", "+string_editText4);
-                            markerOptions.draggable(true);
-                            markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+                        map.addMarker(markerOptions);
+                        dialog.dismiss();
+                    }
+                });
+                button_cancel.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        dialog.dismiss();
+                    }
+                });
+                dialog.show();
+            }
+        });
 
-                            map.addMarker(markerOptions);
-
-                            dialog.dismiss();
-                        }
-                    });
-
-                    dialog.show();
-
-                }
-            });
-        }
-        // infoWindwow 클릭 리스너 설정
-        map.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+        googleMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
             @Override
             public void onInfoWindowClick(final Marker marker) {
 
                 // 마커 정보 가져오기
                 String title = marker.getTitle();
-                String snippet = marker.getSnippet();
-                String[] splitText = snippet.split(", ");
-                // snippet 자르기 ", "
+                MyMarker myMarker = markers.get(markers.indexOf(new MyMarker(title)));
 
-
-                LayoutInflater inflater = getLayoutInflater();
-                AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                final View view = inflater.inflate(R.layout.info, null);
-                builder.setView(view);
-                final Button button_submit = (Button) view.findViewById(R.id.button1);
-                final Button button_delete = (Button) view.findViewById(R.id.button2);
-                final EditText editText1 = (EditText) view.findViewById(R.id.edittext1);
-                final EditText editText2 = (EditText) view.findViewById(R.id.edittext2);
-                final EditText editText3 = (EditText) view.findViewById(R.id.edittext3);
-                final EditText editText4 = (EditText) view.findViewById(R.id.edittext4);
-
-
-
-                // 참여자는 버튼 비활성, 주최자는 모임 수정및 삭제 가능능
-
-                if(id2 == 0)
-                {
-
-                    button_submit.setEnabled(false);
-                    button_delete.setEnabled(false);
+                if(myMarker.getPhoneNum().equals(getPhoneNumber())) {
+                    showHostDialog(marker, myMarker);
+                } else {
+                    showEntryDialog(marker, myMarker);
                 }
-                else
-                {
-                    button_submit.setEnabled(true);
-                    button_delete.setEnabled(true);
-
-                }
-
-
-
-                editText1.setText(title);
-                editText2.setText(splitText[0]);
-                editText3.setText(splitText[1]);
-                editText4.setText(splitText[2]);
-
-                final AlertDialog dialog = builder.create();
-
-                button_submit.setOnClickListener(new View.OnClickListener() {
-                    public void onClick(View v) {
-
-                        String string_editText1 = editText1.getText().toString();
-                        String string_editText2 = editText2.getText().toString();
-                        String string_editText3 = editText3.getText().toString();
-                        String string_editText4 = editText4.getText().toString();
-
-
-                        //Toast.makeText(context, string_placeTitle+"\n"+string_placeDesc,Toast.LENGTH_SHORT).show();
-
-                        marker.setTitle(string_editText1);
-                        marker.setSnippet(string_editText2+", "+string_editText3+", "+string_editText4);
-
-                        dialog.dismiss();
-                        marker.showInfoWindow();
-                    }
-                });
-                button_delete.setOnClickListener(new View.OnClickListener() {
-                    public void onClick(View v) {
-                        marker.remove();
-                    }
-                });
-
-                dialog.show();
             }
         });
 
+        Thread thread = new Thread(){
+            @Override
+            public void run() {
+                getMapData();
+            }
+        };
+        thread.start();
+        try {
+            thread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        for (MyMarker m:markers) {
+            LatLng latLng = new LatLng(m.getLatitude(), m.getLongitude());
 
+            MarkerOptions makerOptions = new MarkerOptions();
+            makerOptions.position(latLng).title(m.getTitle());
+            map.addMarker(makerOptions).showInfoWindow();
+        }
 
-
-
-        map.addMarker(new MarkerOptions().position(curPoint).title("내위치")).showInfoWindow();
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(curPoint, 15));
-        oneMarker();
-        twoMarker();
-
-        //map.addMarker(new MarkerOptions().position(curPoint2).title("모임1")).showInfoWindow();
-        //googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(curPoint2 , 15));
-        //map.addMarker(new MarkerOptions().position(curPoint3).title("모임2")).showInfoWindow();
-        //map.addMarker(new MarkerOptions().position(curPoint2).title("모임1"));
-        //Cue.showInfoWindow();
-        //map.setOnInfoWindowClickListener(Cue);
-        //map.setOnMapClickListener(this);
-        //googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(curPoint2, 15));
-        //showPlaceInformation(curPoint);
-        //map.addMarker(new MarkerOptions().position(curPoint3).title("모임2").snippet("여기는 모임2입니다"));
-        //MapsInitializer.initialize(this.getActivity());
-        //CameraUpdate cameraUpdate= CameraUpdateFactory.newLatLngZoom(new LatLng(37.619467,127.058945), 14);
-        //googleMap.animateCamera(cameraUpdate);
-        //googleMap.addMarker(new MarkerOptions().position(new LatLng(37.619467,127.058945)).title("광운대"));
     }
 
     @Override
@@ -311,162 +312,466 @@ public class FragmentMap extends Fragment implements OnMapReadyCallback, GoogleM
         return false;
     }
 
-
-
-    public void oneMarker() {
-
-        LatLng seoul = new LatLng(37.619715, 127.059909);
-
-        MarkerOptions makerOptions = new MarkerOptions();
-        makerOptions
-                .position(seoul)
-                .title("모임1.")
-                .snippet("4명, 동국1,동국2,동국3,동국4, 9/26")
-                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
-                .alpha(0.5f);
-
-
-        map.addMarker(makerOptions).showInfoWindow(); //.showInfoWindow();
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(seoul, 16));
-
-
-    }
-    public void twoMarker() {
-        LatLng seoul = new LatLng(37.620760, 127.056959);
-
-
-
-        MarkerOptions makerOptions = new MarkerOptions();
-        makerOptions
-                .position(seoul)
-                .title("모임2.")
-                .snippet("5명, a,b,c,d,e, 9/11")
-                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
-                .alpha(0.5f);
-
-
-        map.addMarker(makerOptions).showInfoWindow(); //.showInfoWindow();
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(seoul, 16));
-
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        mapView.onStart();
+    }
 
+    @Override
+    public void onStop() {
+        super.onStop();
+        mapView.onStop();
 
+        if (googleApiClient != null && googleApiClient.isConnected())
+            googleApiClient.disconnect();
+    }
 
-        @Override
-        public void onDestroyView () {
-            super.onDestroyView();
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        mapView.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mapView.onResume();
+        if (map != null)
+            map.setMyLocationEnabled(false);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        mapView.onPause();
+
+        if (googleApiClient != null && googleApiClient.isConnected()) {
+            LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, (com.google.android.gms.location.LocationListener) this);
+            googleApiClient.disconnect();
         }
+    }
 
-        @Override
-        public void onStart () {
-            super.onStart();
-            mapView.onStart();
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+        mapView.onLowMemory();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mapView.onDestroy();
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        MapsInitializer.initialize(getActivity().getApplicationContext());
+        if (mapView != null) {
+            mapView.onCreate(savedInstanceState);
         }
+    }
 
-        @Override
-        public void onStop () {
-            super.onStop();
-            mapView.onStop();
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        return true;
+    }
 
-            if (googleApiClient != null && googleApiClient.isConnected())
-                googleApiClient.disconnect();
+    private void showHostDialog(final Marker marker, final MyMarker myMarker) {
+        LayoutInflater inflater = getLayoutInflater();
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        View view = inflater.inflate(R.layout.alertdialog_marker_host, null);
+        builder.setView(view);
+        Button button_update = view.findViewById(R.id.button_marker_host_update);
+        Button button_delete = view.findViewById(R.id.button_marker_host_delete);
+        Button button_cancel = view.findViewById(R.id.button_marker_host_cancel);
+        final EditText editText_title = view.findViewById(R.id.editText_marker_host_title);
+        final EditText editText_date = view.findViewById(R.id.editText_marker_host_date);
+        TextView textView_entry = view.findViewById(R.id.textView_marker_host_entry);
+
+        editText_title.setText(myMarker.getTitle());
+        editText_date.setText(myMarker.getDate());
+        String enteies = new String();
+        for (Entry e:myMarker.getEntries()) {
+            enteies += "이름: " + e.getName() + ", 연락처: " + e.getPhoneNum() + "\n";
         }
+        textView_entry.setText(enteies);
 
-        @Override
-        public void onSaveInstanceState (Bundle outState){
-            super.onSaveInstanceState(outState);
-            mapView.onSaveInstanceState(outState);
-        }
-
-        @Override
-        public void onResume () {
-            super.onResume();
-            mapView.onResume();
-            if (map != null)
-                map.setMyLocationEnabled(false);
-
-        }
-
-        @Override
-        public void onPause () {
-            super.onPause();
-            mapView.onPause();
-
-            if (googleApiClient != null && googleApiClient.isConnected()) {
-                LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, (com.google.android.gms.location.LocationListener) this);
-                googleApiClient.disconnect();
+        final AlertDialog dialog = builder.create();
+        button_update.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                myMarker.setTitle(editText_title.getText().toString());
+                myMarker.setDate(editText_date.getText().toString());
+                Thread thread = new Thread() {
+                    @Override
+                    public void run() {
+                        updateMapData(myMarker);
+                    }
+                };
+                thread.start();
+                dialog.dismiss();
+                marker.showInfoWindow();
             }
-        }
-
-        @Override
-        public void onLowMemory () {
-            super.onLowMemory();
-            mapView.onLowMemory();
-        }
-
-        @Override
-        public void onDestroy () {
-            super.onDestroy();
-            mapView.onDestroy();
-        }
-
-        @Override
-        public void onActivityCreated (@Nullable Bundle savedInstanceState){
-            super.onActivityCreated(savedInstanceState);
-
-            //액티비티가 처음 생성될 때 실행되는 함수
-            MapsInitializer.initialize(getActivity().getApplicationContext());
-
-            if (mapView != null) {
-                mapView.onCreate(savedInstanceState);
+        });
+        button_delete.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                Thread thread = new Thread() {
+                    @Override
+                    public void run() {
+                        deleteMapData(myMarker);
+                    }
+                };
+                thread.start();
+                dialog.dismiss();
+                marker.remove();
             }
-        }
+        });
+        button_cancel.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+        dialog.show();
+    }
 
-        private Location getLastKnownLocation (String gpsProvider){
-            return null;
-        }
+    private void showEntryDialog(final Marker marker, final MyMarker myMarker) {
+        LayoutInflater inflater = getLayoutInflater();
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        View view = inflater.inflate(R.layout.alertdialog_marker_entry, null);
+        builder.setView(view);
+        Button button_enter = view.findViewById(R.id.button_marker_entry_enter);
+        Button button_cancel = view.findViewById(R.id.button_marker_entry_cancel);
+        TextView textView_title = view.findViewById(R.id.textView_marker_entry_title);
+        TextView textView_date = view.findViewById(R.id.textView_marker_entry_date);
+        TextView textView_entry = view.findViewById(R.id.textView_marker_entry_entry);
 
-        private Object getSystemService (String locationService){
-            return this;
+        textView_title.setText(myMarker.getTitle());
+        textView_date.setText(myMarker.getDate());
+        String enteies = new String();
+        for (Entry e:myMarker.getEntries()) {
+            enteies += "이름: " + e.getName() + ", 연락처: " + e.getPhoneNum() + "\n";
         }
+        textView_entry.setText(enteies);
+        // 참여자는 버튼 비활성, 주최자는 모임 수정및 삭제 가능능
 
+        final AlertDialog dialog = builder.create();
 
-        public void onProviderDisabled (String provider){
-        }
-        public void onProviderEnabled (String provider){
-        }
-        public void onStatusChanged (String provider,int status, Bundle extras){
-        }
-        private void showCurrentLocation (Double latitude, Double longitude)
-        {
-            LatLng curPoint = new LatLng(latitude, longitude);
-            map.animateCamera(CameraUpdateFactory.newLatLngZoom(curPoint, 15));
-            showMyLocationMaker(curPoint);
-        }
+        button_enter.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                Thread thread = new Thread() {
+                    @Override
+                    public void run() {
+                        entry(myMarker);
+                    }
+                };
+                thread.start();
+                dialog.dismiss();
+                marker.showInfoWindow();
+            }
+        });
+        button_cancel.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+        dialog.show();
+    }
 
-        private void showMyLocationMaker (LatLng curPoint){
-            if (myLocationMaker == null) {
-                myLocationMaker = new MarkerOptions();
-                myLocationMaker.position(curPoint);
-                myLocationMaker.title("내 위치\n");
-                myLocationMaker.snippet("GPS로 확인한 위치");
-                //myLocationMaker.icon(BitmapDescriptorFactory.fromResource(R.drawable.mylocation));
-                map.addMarker(myLocationMaker);
-                //map.addMarker(new MarkerOptions().position(curPoint).title("내위치"));
+    private void getMapData() {
+        markers.clear();
+        HttpURLConnection conn = null;
+        try {
+            String urlString = "http://192.168.0.174:8080/bgm/DBConnection";
+            URL url = new URL(urlString);
+            conn = (HttpURLConnection) url.openConnection();
 
+            conn.setReadTimeout(15000);
+            conn.setRequestMethod("POST");
+            conn.setDoInput(true);
+            conn.setDoOutput(true);
+            conn.setRequestProperty("mode", "mapping");
+            conn.setRequestProperty("Content-Type", "application/json; charset=EUC-KR");
+            conn.setRequestProperty("Accept", "application/json");
+
+            int responseCode = conn.getResponseCode();
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                InputStream is = conn.getInputStream();
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                byte[] byteBuffer = new byte[1024];
+                byte[] byteData = null;
+                int length = 0;
+                while ((length = is.read(byteBuffer, 0, byteBuffer.length)) != -1) {
+                    baos.write(byteBuffer, 0, length);
+                }
+                byteData = baos.toByteArray();
+                String responseString = new String(byteData);
+                final JSONArray jsonArray = new JSONArray(responseString);
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    JSONObject object = jsonArray.getJSONObject(i);
+                    MyMarker myMarker = new MyMarker(object.getInt("id"), object.getString("title"), object.getString("date"), Double.parseDouble(object.getString("Latitude")), Double.parseDouble(object.getString("Longitude")), object.getString("phonenum"));
+                    JSONArray entries = object.getJSONArray("entry");
+                    for(int j = 0; j < entries.length(); j++) {
+                        JSONObject entry = entries.getJSONObject(j);
+                        myMarker.addEntry(new Entry(entry.getString("name"), entry.getString("phoneNum")));
+                    }
+                    markers.add(myMarker);
+                }
             } else {
-                myLocationMaker.position(curPoint);
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(getContext(), "서버 연결에 실패하였습니다.", Toast.LENGTH_SHORT).show();
+                    }
+                });
             }
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        } finally {
+            if(conn != null)
+                conn.disconnect();
         }
-
-        @Override
-        public boolean onMarkerClick (Marker marker){
-            return true;
-        }
-
-
     }
+
+    private void setMapData(MyMarker myMarker) {
+        HttpURLConnection conn = null;
+        try {
+            String urlString = "http://192.168.0.174:8080/bgm/DBConnection";
+            URL url = new URL(urlString);
+            conn = (HttpURLConnection) url.openConnection();
+            conn.setReadTimeout(15000);
+            conn.setConnectTimeout(15000);
+            conn.setRequestMethod("POST");
+            conn.setDoInput(true);
+            conn.setDoOutput(true);
+            conn.setRequestProperty("mode", "saveMarker");
+            conn.setRequestProperty("Content-Type", "application/json; charset=EUC-KR");
+            conn.setRequestProperty("Accept", "application/json");
+
+
+            OutputStreamWriter osw = new OutputStreamWriter(conn.getOutputStream(), "EUC-KR");
+            JSONObject obj = new JSONObject();
+            obj.put("title", myMarker.getTitle());
+            obj.put("date", myMarker.getDate());
+            obj.put("latitude", myMarker.getLatitude());
+            obj.put("longitude", myMarker.getLongitude());
+            obj.put("name", myMarker.getEntries().get(0).getName());
+            obj.put("phoneNum", myMarker.getPhoneNum());
+            osw.write(obj.toString());
+            osw.close();
+
+            int responseCode = conn.getResponseCode();
+            if(responseCode == HttpURLConnection.HTTP_OK) {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(getContext(), "모임이 등록되었습니다.", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            } else {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(getContext(), "모임 등록에 실패하였습니다.", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (ProtocolException e) {
+            e.printStackTrace();
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }finally {
+            if(conn != null)
+                conn.disconnect();
+        }
+    }
+
+    private void updateMapData(MyMarker myMarker) {
+        HttpURLConnection conn = null;
+        try {
+            String urlString = "http://192.168.0.174:8080/bgm/DBConnection";
+            URL url = new URL(urlString);
+            conn = (HttpURLConnection) url.openConnection();
+            conn.setReadTimeout(15000);
+            conn.setConnectTimeout(15000);
+            conn.setRequestMethod("POST");
+            conn.setDoInput(true);
+            conn.setDoOutput(true);
+            conn.setRequestProperty("mode", "updateMarker");
+            conn.setRequestProperty("Content-Type", "application/json; charset=EUC-KR");
+            conn.setRequestProperty("Accept", "application/json");
+
+
+            OutputStreamWriter osw = new OutputStreamWriter(conn.getOutputStream(), "EUC-KR");
+            String id = new String();
+            id += myMarker.getId();
+            JSONObject obj = new JSONObject();
+            obj.put("id", id);
+            obj.put("title", myMarker.getTitle());
+            obj.put("date", myMarker.getDate());
+            osw.write(obj.toString());
+            osw.close();
+
+            int responseCode = conn.getResponseCode();
+            if(responseCode == HttpURLConnection.HTTP_OK) {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(getContext(), "모임이 수정되었습니다.", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            } else {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(getContext(), "모임 수정에 실패하였습니다.", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (ProtocolException e) {
+            e.printStackTrace();
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        } finally {
+            if(conn != null)
+                conn.disconnect();
+        }
+    }
+
+    private void deleteMapData(MyMarker myMarker) {
+        HttpURLConnection conn = null;
+        try {
+            String urlString = "http://192.168.0.174:8080/bgm/DBConnection";
+            URL url = new URL(urlString);
+            conn = (HttpURLConnection) url.openConnection();
+            conn.setReadTimeout(15000);
+            conn.setConnectTimeout(15000);
+            conn.setRequestMethod("POST");
+            conn.setDoInput(true);
+            conn.setDoOutput(true);
+            conn.setRequestProperty("mode", "deleteMarker");
+            String id = new String();
+            id += myMarker.getId();
+            conn.setRequestProperty("id", id);
+            conn.setRequestProperty("Content-Type", "application/json; charset=EUC-KR");
+            conn.setRequestProperty("Accept", "application/json");
+
+            int responseCode = conn.getResponseCode();
+            if(responseCode == HttpURLConnection.HTTP_OK) {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(getContext(), "모임이 삭제되었습니다.", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            } else {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(getContext(), "모임 삭제에 실패하였습니다.", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (ProtocolException e) {
+            e.printStackTrace();
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally {
+            if(conn != null)
+                conn.disconnect();
+        }
+    }
+
+    private void entry(MyMarker myMarker) {
+        HttpURLConnection conn = null;
+        try {
+            String urlString = "http://192.168.0.174:8080/bgm/DBConnection";
+            URL url = new URL(urlString);
+            conn = (HttpURLConnection) url.openConnection();
+            conn.setReadTimeout(15000);
+            conn.setConnectTimeout(15000);
+            conn.setRequestMethod("POST");
+            conn.setDoInput(true);
+            conn.setDoOutput(true);
+            conn.setRequestProperty("mode", "entry");
+            conn.setRequestProperty("Content-Type", "application/json; charset=EUC-KR");
+            conn.setRequestProperty("Accept", "application/json");
+
+
+            OutputStreamWriter osw = new OutputStreamWriter(conn.getOutputStream(), "EUC-KR");
+            JSONObject obj = new JSONObject();
+            obj.put("id", myMarker.getId());
+            obj.put("name", myName);
+            obj.put("phoneNum", getPhoneNumber());
+            osw.write(obj.toString());
+            osw.close();
+
+            int responseCode = conn.getResponseCode();
+            if(responseCode == HttpURLConnection.HTTP_OK) {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(getContext(), "모임에 참가/취소되었습니다.", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            } else {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(getContext(), "모임 참가/취소에 실패하였습니다.", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (ProtocolException e) {
+            e.printStackTrace();
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        } finally {
+            if(conn != null)
+                conn.disconnect();
+        }
+    }
+
+    private String getPhoneNumber() {
+        TelephonyManager tm = (TelephonyManager) getContext().getSystemService(TELEPHONY_SERVICE);
+        if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.READ_PHONE_STATE}, 1);
+        }
+        String pNumber = tm.getLine1Number();
+        return pNumber;
+    }
+}
 
 
 

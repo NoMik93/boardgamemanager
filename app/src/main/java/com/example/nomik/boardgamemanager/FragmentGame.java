@@ -129,10 +129,11 @@ public class FragmentGame extends Fragment {
         return view;
     }
     private void getGameData() {
+        HttpURLConnection conn = null;
         try {
             String urlString = "http://192.168.0.174:8080/bgm/DBConnection";
             URL url = new URL(urlString);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn = (HttpURLConnection) url.openConnection();
 
             conn.setReadTimeout(3000);
             conn.setConnectTimeout(3000);
@@ -200,7 +201,11 @@ public class FragmentGame extends Fragment {
             e.printStackTrace();
         } catch (JSONException e) {
             e.printStackTrace();
+        } finally {
+            if(conn != null)
+                conn.disconnect();
         }
+
         final FragmentGameAdapter fragmentGameAdapter = new FragmentGameAdapter(data);
         getActivity().runOnUiThread(new Runnable() {
             @Override
@@ -213,23 +218,24 @@ public class FragmentGame extends Fragment {
     private void SetChart() {
         Collections.sort(gameList);
         Collections.sort(playerList);
-        mWinChart.setUsePercentValues(true);
+
+        mWinChart.setUsePercentValues(true); // 그래프에 퍼센트 표시
         //mWinChart.getLegend().setEnabled(false);
-        ArrayList<PieEntry> mwEntry = new ArrayList<>();
+        ArrayList<PieEntry> mwEntry = new ArrayList<>(); // 그래프에 표시할 값들 저장
         mwEntry.add(new PieEntry(mWinGameNum, "승"));
         mwEntry.add((new PieEntry((data.size() - mWinGameNum), "패")));
         Description mwDescription = new Description();
-        mwDescription.setText("나의 승률");
+        mwDescription.setText("나의 승률"); // 그래프 라벨
         mwDescription.setTextSize(15);
-        mWinChart.setDescription(mwDescription);
+        mWinChart.setDescription(mwDescription); // 원 그래프에 설명을 붙임
         PieDataSet mwDataSet = new PieDataSet(mwEntry, "");
         mwDataSet.setSliceSpace(3f);
         mwDataSet.setSelectionShift(5f);
-        mwDataSet.setColors(ColorTemplate.PASTEL_COLORS);
+        mwDataSet.setColors(ColorTemplate.PASTEL_COLORS); // 그래프 색깔 템플릿 설정
         PieData mwData = new PieData(mwDataSet);
         mwData.setValueTextSize(15f);
-        mwData.setValueTextColor(Color.BLACK);
-        mWinChart.setEntryLabelColor(Color.BLACK);
+        mwData.setValueTextColor(Color.BLACK); // 그래프 수치 색은 검은색
+        mWinChart.setEntryLabelColor(Color.BLACK); // 그래프 수치의 이름 색은 검은색
         mWinChart.setData(mwData);
 
         gameChart.setUsePercentValues(true);
@@ -271,31 +277,6 @@ public class FragmentGame extends Fragment {
         awData.setValueTextColor(Color.BLACK);
         aWinChart.setEntryLabelColor(Color.BLACK);
         aWinChart.setData(awData);
-    }
-    private void setChart(PieChart pieChart){
-        pieChart.setUsePercentValues(false);//그래프에 표시되는 수치를 true로 하면 percent, false로 하면 rawData
-
-        ArrayList<PieEntry> val=new ArrayList<>(); //그래프로 그릴 데이터의 값을 저장한다.
-        val.add(new PieEntry(1,"A"));
-        val.add(new PieEntry(2,"B"));
-        val.add(new PieEntry(3,"C"));
-
-        Description description = new Description();
-        description.setText("알파벳"); //라벨
-        description.setTextSize(15);
-        pieChart.setDescription(description); //원그래프에 description을 붙인다.
-
-        //화면 좌측하단부 설정
-        PieDataSet dataSet = new PieDataSet(val,"Countries");
-        dataSet.setSliceSpace(3f);
-        dataSet.setSelectionShift(5f);
-        dataSet.setColors(ColorTemplate.JOYFUL_COLORS);
-
-        PieData data = new PieData((dataSet));
-        data.setValueTextSize(10f);
-        data.setValueTextColor(Color.BLACK); //원그래프 안에 수치를 표시하는 text의 색
-
-        pieChart.setData(data);
     }
 
     private String getPhoneNumber() {

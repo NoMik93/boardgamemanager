@@ -70,10 +70,11 @@ public class FragmentScore extends Fragment {
     }
 
     private void saveData() {
+        HttpURLConnection conn = null;
         try {
             String urlString = "http://192.168.0.174:8080/bgm/DBConnection";
             URL url = new URL(urlString);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn = (HttpURLConnection) url.openConnection();
 
             conn.setReadTimeout(15000);
             conn.setConnectTimeout(15000);
@@ -119,6 +120,9 @@ public class FragmentScore extends Fragment {
             e.printStackTrace();
         } catch (JSONException e) {
             e.printStackTrace();
+        } finally {
+            if(conn != null)
+                conn.disconnect();
         }
     }
 

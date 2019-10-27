@@ -20,7 +20,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -152,10 +151,11 @@ public class FragmentSearchGame extends Fragment {
     }
 
     private void saveDescription(String id, String description) {
+        HttpURLConnection conn = null;
         try {
             String urlString = "http://192.168.0.174:8080/bgm/DBConnection";
             URL url = new URL(urlString);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn = (HttpURLConnection) url.openConnection();
 
             conn.setReadTimeout(15000);
             conn.setConnectTimeout(15000);
@@ -189,6 +189,9 @@ public class FragmentSearchGame extends Fragment {
             e.printStackTrace();
         } catch (JSONException e) {
             e.printStackTrace();
+        } finally {
+            if(conn != null)
+                conn.disconnect();
         }
     }
 }

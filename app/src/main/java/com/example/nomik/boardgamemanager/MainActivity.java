@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
     private FragmentSearchGame fragmentSearchGame;
     private FragmentGame fragmentGame;
     private FragmentMap fragmentMap;
-    private String myName;
+    private String myName = new String();
     private ArrayList<FragmentSearchData> recentSearch = new ArrayList<>();
 
     @Override
@@ -170,6 +170,7 @@ public class MainActivity extends AppCompatActivity {
                 Thread thread = new Thread(new Runnable() {
                     @Override
                     public void run() {
+                        HttpURLConnection conn = null;
                         try {
                             String year = null;
                             String minplaytime = null;
@@ -182,7 +183,7 @@ public class MainActivity extends AppCompatActivity {
                             String description = null;
                             String urlString = "http://192.168.0.174:8080/bgm/DBConnection";
                             URL url = new URL(urlString);
-                            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                            conn = (HttpURLConnection) url.openConnection();
 
                             conn.setReadTimeout(3000);
                             conn.setConnectTimeout(3000);
@@ -246,6 +247,9 @@ public class MainActivity extends AppCompatActivity {
                             e.printStackTrace();
                         } catch (JSONException e) {
                             e.printStackTrace();
+                        } finally {
+                            if(conn != null)
+                                conn.disconnect();
                         }
                     }
                 });
