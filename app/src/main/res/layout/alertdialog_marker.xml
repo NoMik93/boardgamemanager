@@ -54,11 +54,13 @@
         android:layout_weight="1"
         android:weightSum="1">
         <Button android:id="@+id/button_marker_cancel"
+            android:layout_marginLeft="100dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="취소" />
 
         <Button android:id="@+id/button_marker_create"
+            android:layout_marginLeft="30dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="생성" />

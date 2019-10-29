@@ -1,6 +1,7 @@
 package com.example.nomik.boardgamemanager;
 
 import android.app.Activity;
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -13,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.json.JSONArray;
@@ -39,11 +41,13 @@ import java.util.regex.Pattern;
 
 
 public class FragmentSearch extends Fragment {
-    ClearEditText editText;
+    EditText editText;
     ListView search_ListView;
     ListView recent_ListView;
     ListView realTime_ListView;
     String url_String;
+    TextView textview1;
+    TextView textview2;
     ArrayList<FragmentSearchData> data = new ArrayList<>();
     ArrayList<FragmentSearchData> recentData = new ArrayList<>();
     ArrayList<FragmentSearchData> realTimeData = new ArrayList<>();
@@ -64,6 +68,14 @@ public class FragmentSearch extends Fragment {
                 editText.setText("");
             }
         });
+        //한글 굵기 설정
+        textview1 = view.findViewById(R.id.textview_realfind);
+        textview1.setText("실시간 검색어");
+        textview1.setPaintFlags(textview1.getPaintFlags() | Paint.FAKE_BOLD_TEXT_FLAG);
+        textview2 = view.findViewById(R.id.textview_hotfind);
+        textview2.setText("최근 검색한 게임");
+        textview2.setPaintFlags(textview2.getPaintFlags() | Paint.FAKE_BOLD_TEXT_FLAG);
+
         editText.addTextChangedListener(new TextWatcher() {
             private Timer timer = new Timer();
             private final long DELAY = 500;

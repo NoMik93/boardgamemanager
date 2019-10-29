@@ -12,15 +12,21 @@
         android:orientation="horizontal"
         android:weightSum="10">
 
+
+
         <ImageView android:id="@+id/app_name"
             android:layout_width="0dp"
             android:layout_height="match_parent"
+            android:background="@android:color/white"
             android:layout_weight="3"/>
 
         <ImageView
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="5"/>
+            android:layout_weight="5"
+            android:layout_marginLeft="-40dp"
+            android:background="@android:color/white"
+            android:src="@drawable/logo"/>
 
         <ImageButton android:id="@+id/button_help"
             android:layout_width="0dp"
@@ -28,7 +34,7 @@
             android:layout_weight="1"
             android:scaleType="centerInside"
             android:src="@drawable/button_help"
-            android:background="@android:color/transparent"/>
+            android:background="@android:color/white"/>
 
         <ImageButton android:id="@+id/button_personal"
             android:layout_width="0dp"
@@ -36,7 +42,7 @@
             android:layout_weight="1"
             android:scaleType="centerInside"
             android:src="@drawable/button_personal"
-            android:background="@android:color/transparent"/>
+            android:background="@android:color/white"/>
     </LinearLayout>
 
     <FrameLayout android:id="@+id/fragment_frame"
@@ -58,7 +64,7 @@
             android:scaleType="centerInside"
             android:src="@drawable/button_search_selected"
             android:onClick="onClickMenuButton"
-            android:background="@android:color/transparent"/>
+            android:background="@android:color/white"/>
 
         <ImageButton android:id="@+id/button_game"
             android:layout_width="0dp"
@@ -67,7 +73,7 @@
             android:scaleType="centerInside"
             android:src="@drawable/button_game_unselected"
             android:onClick="onClickMenuButton"
-            android:background="@android:color/transparent"/>
+            android:background="@android:color/white"/>
 
         <ImageButton android:id="@+id/button_map"
             android:layout_width="0dp"
@@ -76,7 +82,7 @@
             android:scaleType="centerInside"
             android:src="@drawable/button_map_unselected"
             android:onClick="onClickMenuButton"
-            android:background="@android:color/transparent"/>
+            android:background="@android:color/white"/>
     </LinearLayout>
 
 </LinearLayout>

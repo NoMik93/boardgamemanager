@@ -60,16 +60,19 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
         <Button android:id="@+id/button_marker_host_cancel"
+            android:layout_marginLeft="55dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="취소" />
 
         <Button android:id="@+id/button_marker_host_delete"
+            android:layout_marginLeft="20dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="삭제" />
 
         <Button android:id="@+id/button_marker_host_update"
+            android:layout_marginLeft="20dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="수정" />

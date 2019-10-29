@@ -4,7 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:weightSum="9"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="@android:color/white">
 
     <ListView android:id="@+id/listView_contact_selected"
         android:layout_width="match_parent"
@@ -18,7 +19,8 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:weightSum="4">
+        android:weightSum="4"
+        android:background="@android:color/white">
 
         <ImageButton android:id="@+id/button_contact_add_from_contact"
             android:layout_width="0dp"
@@ -26,7 +28,7 @@
             android:layout_weight="1"
             android:src="@drawable/button_contact_add_from_contact"
             android:scaleType="fitCenter"
-            android:background="@android:color/transparent"/>
+            android:background="@android:color/white"/>
 
         <ImageButton android:id="@+id/button_contact_add_self"
             android:layout_width="0dp"
@@ -34,7 +36,7 @@
             android:layout_weight="1"
             android:src="@drawable/button_contact_add_by_self"
             android:scaleType="fitCenter"
-            android:background="@android:color/transparent"/>
+            android:background="@android:color/white"/>
 
         <ImageButton android:id="@+id/button_contact_delete"
             android:layout_width="0dp"
@@ -42,7 +44,7 @@
             android:layout_weight="1"
             android:src="@drawable/button_contact_delete"
             android:scaleType="fitCenter"
-            android:background="@android:color/transparent"/>
+            android:background="@android:color/white"/>
 
         <ImageButton android:id="@+id/button_contact_complete"
             android:layout_width="0dp"
@@ -50,7 +52,7 @@
             android:layout_weight="1"
             android:src="@drawable/button_contact_complete"
             android:scaleType="fitCenter"
-            android:background="@android:color/transparent"/>
+            android:background="@android:color/white"/>
 
     </LinearLayout>
 </LinearLayout>
