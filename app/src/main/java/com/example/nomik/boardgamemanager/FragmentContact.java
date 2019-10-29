@@ -51,9 +51,11 @@ public class FragmentContact extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         ViewGroup view = (ViewGroup) inflater.inflate(R.layout.fragment_contact, container, false);
         listView = view.findViewById(R.id.listView_contact_selected);
-        ContactItem contactItem = new ContactItem();
-        contactItem.name = ((GameActivity)getActivity()).getMyName();
-        players.add(contactItem);
+        if (players.size() == 0) {
+            ContactItem contactItem = new ContactItem();
+            contactItem.name = ((GameActivity)getActivity()).getMyName();
+            players.add(contactItem);
+        }
         ContactAdapter contactAdapter = new ContactAdapter(players);
         contactAdapter.notifyDataSetChanged();
         listView.setAdapter(contactAdapter);

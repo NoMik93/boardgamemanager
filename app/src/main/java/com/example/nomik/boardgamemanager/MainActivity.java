@@ -259,7 +259,8 @@ public class MainActivity extends AppCompatActivity {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                fragmentTransaction.replace(R.id.fragment_frame, fragmentSearchGame).addToBackStack(null).commit();
+                fragmentTransaction.replace(R.id.fragment_frame, fragmentSearchGame).addToBackStack(null);
+                fragmentTransaction.commit();
                 break;
             }
         }

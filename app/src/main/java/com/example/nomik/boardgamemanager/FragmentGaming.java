@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.Random;
 
 public class FragmentGaming extends Fragment {
-    private long startTime;
+    private long startTime = 0;
     private TextView textView_time;
     private TextView textView_dice_eye;
     private TextView textView_dice;
@@ -35,7 +35,8 @@ public class FragmentGaming extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         ViewGroup view = (ViewGroup) inflater.inflate(R.layout.fragment_gaming, container, false);
-        startTime = System.currentTimeMillis();
+        if(startTime == 0)
+            startTime = System.currentTimeMillis();
         textView_time = view.findViewById(R.id.textView_gaming_time);
         textView_dice_eye = view.findViewById(R.id.TextView_gaming_dice_eye);
         textView_dice = view.findViewById(R.id.TextView_gaming_dice);
@@ -46,18 +47,25 @@ public class FragmentGaming extends Fragment {
         trackers = view.findViewById(R.id.listView_gaming_tracker);
         dm = getContext().getResources().getDisplayMetrics();
 
+        if(data.size() > 0) {
+            TrackerAdapter trackerAdapter = new TrackerAdapter(data);
+            trackers.setAdapter(trackerAdapter);
+            trackers.deferNotifyDataSetChanged();
+            setListViewHeightBasedOnChildren(trackers);
+        }
+
         thread = new Thread(new Runnable() {
             @Override
             public void run() {
                 while (!Thread.interrupted()) {
                     try {
-                        Thread.sleep(1000);
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 update();
                             }
                         });
+                        Thread.sleep(1000);
                     } catch (InterruptedException e) {
                     } catch (NullPointerException e) {
                         Thread.interrupted();
@@ -319,7 +327,6 @@ public class FragmentGaming extends Fragment {
         button_complete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                thread.interrupt();
                 ((GameActivity)getActivity()).SetTime(textView_time.getText().toString());
                 ((GameActivity)getActivity()).SetFragment("score");
             }
