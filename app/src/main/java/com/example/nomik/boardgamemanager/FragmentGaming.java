@@ -4,13 +4,19 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.DisplayMetrics;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.ListAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 public class FragmentGaming extends Fragment {
@@ -20,7 +26,10 @@ public class FragmentGaming extends Fragment {
     private TextView textView_dice;
     private TextView textView_coin;
     private int dice_eye, dice, coin;
+    ArrayList<TrackerItem> data = new ArrayList<>();
+    private static ListView trackers;
     Thread thread;
+    static DisplayMetrics dm;
 
     @Nullable
     @Override
@@ -34,6 +43,8 @@ public class FragmentGaming extends Fragment {
         dice_eye = 6;
         dice = 1;
         coin = 1;
+        trackers = view.findViewById(R.id.listView_gaming_tracker);
+        dm = getContext().getResources().getDisplayMetrics();
 
         thread = new Thread(new Runnable() {
             @Override
@@ -55,6 +66,37 @@ public class FragmentGaming extends Fragment {
             }
         });
         thread.start();
+
+        ImageButton imageButton = view.findViewById(R.id.addTracker);
+        imageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                TrackerItem trackerItem = new TrackerItem();
+                data.add(trackerItem);
+                TrackerAdapter trackerAdapter = new TrackerAdapter(data);
+                trackers.setAdapter(trackerAdapter);
+                trackers.deferNotifyDataSetChanged();
+                setListViewHeightBasedOnChildren(trackers);
+            }
+        });
+        imageButton = view.findViewById(R.id.removeTracker);
+        imageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ArrayList<TrackerItem> temp = new ArrayList<>();
+                for (TrackerItem ti: data) {
+                    if(!ti.getSelecet()) {
+                        temp.add(ti);
+                    }
+                }
+                data.clear();
+                data.addAll(temp);
+                TrackerAdapter trackerAdapter = new TrackerAdapter(data);
+                trackers.setAdapter(trackerAdapter);
+                trackers.deferNotifyDataSetChanged();
+                setListViewHeightBasedOnChildren(trackers);
+            }
+        });
 
         Button button = view.findViewById(R.id.Button_gaming_dice_eye_minus5);
         button.setOnClickListener(new View.OnClickListener() {
@@ -293,5 +335,18 @@ public class FragmentGaming extends Fragment {
         long s= ((milliTime % (1000 * 60 * 60)) % (1000 * 60)) / 1000;
 
         textView_time.setText(String.format("%02d:%02d:%02d", h, m, s));
+    }
+    public static void setListViewHeightBasedOnChildren(ListView listView) {
+        ListAdapter listAdapter = listView.getAdapter();
+        if (listAdapter == null) {
+            return;
+        }
+
+        int height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 240, dm);
+
+        ViewGroup.LayoutParams params = listView.getLayoutParams();
+        params.height = (height * listAdapter.getCount()) + (listView.getDividerHeight() * (listAdapter.getCount() - 1));
+        listView.setLayoutParams(params);
+        listView.requestLayout();
     }
 }

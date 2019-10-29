@@ -15,8 +15,7 @@
         android:weightSum="5"
         android:gravity="center">
 
-        <EditText
-            android:id="@+id/editText_search"
+        <com.example.nomik.boardgamemanager.ClearEditText android:id="@+id/editText_search"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="4"

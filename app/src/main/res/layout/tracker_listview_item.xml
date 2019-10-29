@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="240dp"
+    android:orientation="vertical"
+    android:padding="10dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:orientation="horizontal">
+        <EditText android:id="@+id/editText_tracker_name"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:hint="이름"
+            android:imeOptions="actionNext"/>
+        <ImageButton android:id="@+id/button_tracker_close"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@drawable/ic_check_box_outline_blank_black_24dp"/>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:weightSum="5">
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:weightSum="10"
+            android:orientation="vertical">
+            <ImageButton android:id="@+id/button_tracker_color_up"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="3"
+                android:src="@drawable/ic_expand_less_black_24dp"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="4"
+                android:gravity="center">
+                <View android:id="@+id/View_tracker_color"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"/>
+            </LinearLayout>
+            <ImageButton android:id="@+id/button_tracker_color_down"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="3"
+                android:src="@drawable/ic_expand_more_black_24dp"/>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="3"
+            android:weightSum="10"
+            android:orientation="vertical">
+            <ImageButton android:id="@+id/button_tracker_value_up"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="3"
+                android:src="@drawable/ic_expand_less_black_24dp"/>
+            <EditText android:id="@+id/editText_tracker_value"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="4"
+                android:gravity="center"
+                android:inputType="numberSigned|numberDecimal"
+                android:imeOptions="actionNext"/>
+            <ImageButton android:id="@+id/button_tracker_value_down"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="3"
+                android:src="@drawable/ic_expand_more_black_24dp"/>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:weightSum="10"
+            android:orientation="vertical">
+            <ImageButton android:id="@+id/button_tracker_change_value_up"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="3"
+                android:src="@drawable/ic_expand_less_black_24dp"/>
+            <EditText android:id="@+id/editText_tracker_change_value"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="4"
+                android:gravity="center"
+                android:inputType="numberSigned|numberDecimal"
+                android:imeOptions="actionDone"/>
+            <ImageButton android:id="@+id/button_tracker_change_value_down"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="3"
+                android:src="@drawable/ic_expand_more_black_24dp"/>
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>

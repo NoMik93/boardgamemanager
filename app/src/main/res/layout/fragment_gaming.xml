@@ -1,205 +1,221 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:weightSum="10"
-    android:orientation="vertical">
-
-    <TextView android:id="@+id/textView_gaming_time"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:padding="5dp"
-        android:text="00:00:00"
-        android:layout_weight="1"
-        android:gravity="end"/>
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:padding="5dp"
-        android:text="주사위 굴리기"
-        android:layout_weight="1"
-        android:gravity="center"/>
+    android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="2"
-        android:orientation="horizontal"
-        android:weightSum="7">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
         <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="5"
-            android:orientation="vertical"
-            android:weightSum="2">
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:gravity="right">
+            <TextView android:id="@+id/textView_gaming_time"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:padding="5dp"
+                android:text="00:00:00"/>
+
+            <ImageButton android:id="@+id/addTracker"
+                android:layout_width="40dp"
+                android:layout_height="match_parent"
+                android:scaleType="centerInside"
+                android:src="@drawable/button_add_tracker"
+                android:background="@android:color/transparent"/>
+
+            <ImageButton android:id="@+id/removeTracker"
+                android:layout_width="40dp"
+                android:layout_height="match_parent"
+                android:scaleType="centerInside"
+                android:src="@drawable/button_remove_tracker"
+                android:background="@android:color/transparent"/>
+        </LinearLayout>
+
+        <ListView android:id="@+id/listView_gaming_tracker"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:padding="5dp"
+            android:text="주사위 굴리기"
+            android:gravity="center"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:orientation="horizontal"
+            android:weightSum="7">
 
             <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1">
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="5"
+                android:orientation="vertical"
+                android:weightSum="2">
 
-                <Button android:id="@+id/Button_gaming_dice_eye_minus5"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:padding="5dp"
-                    android:text="-5"/>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1">
 
-                <Button android:id="@+id/Button_gaming_dice_eye_minus1"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:padding="5dp"
-                    android:text="-1"/>
+                    <Button android:id="@+id/Button_gaming_dice_eye_minus5"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:padding="5dp"
+                        android:text="-5"/>
 
-                <TextView android:id="@+id/TextView_gaming_dice_eye"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:padding="5dp"
-                    android:gravity="center"
-                    android:text="눈의 수"/>
+                    <Button android:id="@+id/Button_gaming_dice_eye_minus1"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:padding="5dp"
+                        android:text="-1"/>
 
-                <Button android:id="@+id/Button_gaming_dice_eye_plus1"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:padding="5dp"
-                    android:text="+1"/>
+                    <TextView android:id="@+id/TextView_gaming_dice_eye"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:padding="5dp"
+                        android:gravity="center"
+                        android:text="눈의 수"/>
 
-                <Button android:id="@+id/Button_gaming_dice_eye_plus5"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:padding="5dp"
-                    android:text="+5"/>
+                    <Button android:id="@+id/Button_gaming_dice_eye_plus1"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:padding="5dp"
+                        android:text="+1"/>
+
+                    <Button android:id="@+id/Button_gaming_dice_eye_plus5"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:padding="5dp"
+                        android:text="+5"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1">
+
+                    <Button android:id="@+id/Button_gaming_dice_minus5"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:padding="5dp"
+                        android:text="-5"/>
+
+                    <Button android:id="@+id/Button_gaming_dice_minus1"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:padding="5dp"
+                        android:text="-1"/>
+
+                    <TextView android:id="@+id/TextView_gaming_dice"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:padding="5dp"
+                        android:gravity="center"
+                        android:text="굴릴 개수"/>
+
+                    <Button android:id="@+id/Button_gaming_dice_plus1"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:padding="5dp"
+                        android:text="+1"/>
+
+                    <Button android:id="@+id/Button_gaming_dice_plus5"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:padding="5dp"
+                        android:text="+5"/>
+                </LinearLayout>
+
             </LinearLayout>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1">
+            <Button android:id="@+id/Button_gaming_dice_roll"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="2"
+                android:padding="5dp"
+                android:text="굴리기"/>
+        </LinearLayout>
 
-                <Button android:id="@+id/Button_gaming_dice_minus5"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:padding="5dp"
-                    android:text="-5"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:padding="5dp"
+            android:text="동전 던지기"
+            android:gravity="center"/>
 
-                <Button android:id="@+id/Button_gaming_dice_minus1"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:padding="5dp"
-                    android:text="-1"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:orientation="horizontal"
+            android:weightSum="7">
 
-                <TextView android:id="@+id/TextView_gaming_dice"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:padding="5dp"
-                    android:gravity="center"
-                    android:text="굴릴 개수"/>
+            <Button android:id="@+id/Button_gaming_coin_minus5"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:padding="5dp"
+                android:text="-5"/>
 
-                <Button android:id="@+id/Button_gaming_dice_plus1"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:padding="5dp"
-                    android:text="+1"/>
+            <Button android:id="@+id/Button_gaming_coin_minus1"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:padding="5dp"
+                android:text="-1"/>
 
-                <Button android:id="@+id/Button_gaming_dice_plus5"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:padding="5dp"
-                    android:text="+5"/>
-            </LinearLayout>
+            <TextView android:id="@+id/TextView_gaming_coin"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:padding="5dp"
+                android:gravity="center"
+                android:text="던질 개수"/>
+
+            <Button android:id="@+id/Button_gaming_coin_plus1"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:padding="5dp"
+                android:text="+1"/>
+
+            <Button android:id="@+id/Button_gaming_coin_plus5"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:padding="5dp"
+                android:text="+5"/>
+
+            <Button android:id="@+id/Button_gaming_coin_toss"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="2"
+                android:padding="5dp"
+                android:text="던지기"/>
 
         </LinearLayout>
 
-        <Button android:id="@+id/Button_gaming_dice_roll"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="2"
-            android:padding="5dp"
-            android:text="굴리기"/>
+        <Button android:id="@+id/Button_gaming_complete"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_gravity="end"
+            android:text="게임 종료"/>
     </LinearLayout>
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:padding="5dp"
-        android:text="동전 던지기"
-        android:layout_weight="1"
-        android:gravity="center"/>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:orientation="horizontal"
-        android:weightSum="7">
-
-        <Button android:id="@+id/Button_gaming_coin_minus5"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:padding="5dp"
-            android:text="-5"/>
-
-        <Button android:id="@+id/Button_gaming_coin_minus1"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:padding="5dp"
-            android:text="-1"/>
-
-        <TextView android:id="@+id/TextView_gaming_coin"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:padding="5dp"
-            android:gravity="center"
-            android:text="던질 개수"/>
-
-        <Button android:id="@+id/Button_gaming_coin_plus1"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:padding="5dp"
-            android:text="+1"/>
-
-        <Button android:id="@+id/Button_gaming_coin_plus5"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:padding="5dp"
-            android:text="+5"/>
-
-        <Button android:id="@+id/Button_gaming_coin_toss"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="2"
-            android:padding="5dp"
-            android:text="굴리기"/>
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="3"></LinearLayout>
-
-    <Button android:id="@+id/Button_gaming_complete"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:layout_gravity="bottom"
-        android:text="게임 종료"/>
-
-</LinearLayout>
+</ScrollView>

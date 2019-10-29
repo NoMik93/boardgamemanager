@@ -61,20 +61,24 @@ public class ContactAdapter extends BaseAdapter {
         ImageView imageView = view.findViewById(R.id.contact_ListView_image);
         Bitmap image = loadPhoto(context.getContentResolver(), data.get(i).person_id, data.get(i).photo_id);
         if (image != null)
-        imageView.setImageBitmap(image);
+            imageView.setImageBitmap(image);
+        final ImageView imageViewSelect = view.findViewById(R.id.imageView_select);
         if (i == 0){
             view.setBackgroundColor(Color.GRAY);
+            imageViewSelect.setImageResource(R.drawable.ic_indeterminate_check_box_black_24dp);
         } else {
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     if(data.get(index).selected) {
                         view.setBackgroundColor(Color.WHITE);
+                        imageViewSelect.setImageResource(R.drawable.ic_check_box_outline_blank_black_24dp);
                         data.get(index).selected = false;
                     }
                     else {
                         view.setBackgroundColor(Color.BLUE);
                         data.get(index).selected = true;
+                        imageViewSelect.setImageResource(R.drawable.ic_check_box_black_24dp);
                     }
                 }
             });

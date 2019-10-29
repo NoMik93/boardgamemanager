@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
                 builder.setTitle("프로필 설정");
-                final EditText editText = new EditText(MainActivity.this);
+                final ClearEditText editText = new ClearEditText(MainActivity.this);
                 editText.setText(myName);
                 builder.setView(editText);
                 builder.setPositiveButton("확인", new DialogInterface.OnClickListener() {

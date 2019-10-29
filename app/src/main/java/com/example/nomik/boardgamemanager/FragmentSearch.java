@@ -39,7 +39,7 @@ import java.util.regex.Pattern;
 
 
 public class FragmentSearch extends Fragment {
-    EditText editText;
+    ClearEditText editText;
     ListView search_ListView;
     ListView recent_ListView;
     ListView realTime_ListView;
