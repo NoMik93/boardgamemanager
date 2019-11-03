@@ -10,7 +10,6 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
-
 import java.util.ArrayList;
 
 public class TrackerAdapter extends BaseAdapter {
@@ -47,14 +46,29 @@ public class TrackerAdapter extends BaseAdapter {
                 inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             view = inflater.inflate(R.layout.tracker_listview_item, viewGroup, false);
         }
+        final View tracker = view;
         final View colorView = view.findViewById(R.id.View_tracker_color);
+        final EditText editTextName = view.findViewById(R.id.editText_tracker_name);
         final EditText editTextValue = view.findViewById(R.id.editText_tracker_value);
         final EditText editTextChange = view.findViewById(R.id.editText_tracker_change_value);
-        if(i < data.size()) {
-            colorView.setBackgroundColor(getColor(data.get(i).getColor()));
-            editTextValue.setText(String.valueOf(data.get(i).getValue()));
-            editTextChange.setText(String.valueOf(data.get(i).getChange()));
-        }
+        tracker.setBackgroundColor(getBackColor(data.get(i).getColor()));
+        if(data.get(i).getName() != null)
+            editTextName.setText(String.valueOf(data.get(i).getName()));
+        colorView.setBackgroundColor(getColor(data.get(i).getColor()));
+        editTextValue.setText(String.valueOf(data.get(i).getValue()));
+        editTextChange.setText(String.valueOf(data.get(i).getChange()));
+        editTextName.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) { }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) { }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                data.get(index).setName(editable.toString());
+            }
+        });
         editTextValue.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) { }
@@ -102,6 +116,7 @@ public class TrackerAdapter extends BaseAdapter {
             public void onClick(View view) {
                 data.get(index).colorDown();
                 colorView.setBackgroundColor(getColor(data.get(index).getColor()));
+                tracker.setBackgroundColor(getBackColor(data.get(index).getColor()));
             }
         });
         imageButton = view.findViewById(R.id.button_tracker_color_up);
@@ -110,6 +125,7 @@ public class TrackerAdapter extends BaseAdapter {
             public void onClick(View view) {
                 data.get(index).colorUp();
                 colorView.setBackgroundColor(getColor(data.get(index).getColor()));
+                tracker.setBackgroundColor(getBackColor(data.get(index).getColor()));
             }
         });
         imageButton = view.findViewById(R.id.button_tracker_value_down);
@@ -154,19 +170,42 @@ public class TrackerAdapter extends BaseAdapter {
             case 1:
                 return Color.BLUE;
             case 2:
-                return Color.YELLOW;
+                return Color.rgb(255,210,90);
             case 3:
                 return Color.GREEN;
             case 4:
                 return Color.rgb(153,0,153);
             case 5:
-                return Color.GRAY;
+                return Color.rgb(130,130,130);
             case 6:
                 return Color.WHITE;
             case 7:
                 return Color.BLACK;
             default:
                 return Color.RED;
+        }
+    }
+
+    int getBackColor(int num) {
+        switch (num) {
+            case 0:
+                return Color.argb(80,255,0,0);
+            case 1:
+                return Color.argb(80,0,0,255);
+            case 2:
+                return Color.argb(80,255,255,0);
+            case 3:
+                return Color.argb(80,0,255,0);
+            case 4:
+                return Color.argb(80,153,0,153);
+            case 5:
+                return Color.argb(80,130,130,130);
+            case 6:
+                return Color.argb(80,200,200,200);
+            case 7:
+                return Color.argb(80,0,0,0);
+            default:
+                return Color.argb(80,255,0,0);
         }
     }
 }

@@ -3,4 +3,13 @@
     <color name="colorPrimary">#008577</color>
     <color name="colorPrimaryDark">#00574B</color>
     <color name="colorAccent">#D81B60</color>
+    <color name="colorWhite">#FFFFFF</color>
+    <color name="colorGray">#EEEEEE</color>
+    <color name="colorBlack">#000000</color>
+    <color name="tranceparent">#00000000</color>
+    <color name="BluesColorPalette_1">#011F4B</color>
+    <color name="BluesColorPalette_2">#03396C</color>
+    <color name="BluesColorPalette_3">#005B96</color>
+    <color name="BluesColorPalette_4">#6497B1</color>
+    <color name="BluesColorPalette_5">#B3CDE0</color>
 </resources>

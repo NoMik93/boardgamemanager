@@ -14,16 +14,9 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 
 import static android.content.Context.TELEPHONY_SERVICE;
@@ -70,23 +63,8 @@ public class FragmentScore extends Fragment {
     }
 
     private void saveData() {
-        HttpURLConnection conn = null;
+        JSONObject obj = new JSONObject();
         try {
-            String urlString = "http://192.168.0.174:8080/bgm/DBConnection";
-            URL url = new URL(urlString);
-            conn = (HttpURLConnection) url.openConnection();
-
-            conn.setReadTimeout(15000);
-            conn.setConnectTimeout(15000);
-            conn.setRequestMethod("POST");
-            conn.setDoInput(true);
-            conn.setDoOutput(true);
-            conn.setRequestProperty("mode", "saveGame");
-            conn.setRequestProperty("Content-Type", "application/json; charset=EUC-KR");
-            conn.setRequestProperty("Accept", "application/json");
-
-            OutputStreamWriter osw = new OutputStreamWriter(conn.getOutputStream(), "EUC-KR");
-            JSONObject obj = new JSONObject();
             obj.put("gameID", gameID);
             obj.put("gameName", gameName);
             obj.put("user", getPhoneNumber());
@@ -101,28 +79,24 @@ public class FragmentScore extends Fragment {
             }
             obj.put("players", players);
             obj.put("scores", scores);
-            osw.write(obj.toString());
-            osw.close();
-
-            int responseCode = conn.getResponseCode();
-
-            if (responseCode == HttpURLConnection.HTTP_OK) {
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(getContext(), "저장이 완료되었습니다.", Toast.LENGTH_SHORT).show();
-                    }
-                });
-            }
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
         } catch (JSONException e) {
             e.printStackTrace();
-        } finally {
-            if(conn != null)
-                conn.disconnect();
+        }
+        ServerConnect serverConnect = new ServerConnect("saveGame", obj.toString());
+        if(serverConnect.send()){
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(getContext(), "저장이 완료되었습니다.", Toast.LENGTH_SHORT).show();
+                }
+            });
+        } else {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(getContext(), "저장에 실패하였습니다.", Toast.LENGTH_SHORT).show();
+                }
+            });
         }
     }
 

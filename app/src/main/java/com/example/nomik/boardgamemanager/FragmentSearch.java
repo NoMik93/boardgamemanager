@@ -1,7 +1,5 @@
 package com.example.nomik.boardgamemanager;
 
-import android.app.Activity;
-import android.graphics.Paint;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -11,34 +9,31 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
-
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.regex.Pattern;
 
+import static android.content.Context.INPUT_METHOD_SERVICE;
 
 public class FragmentSearch extends Fragment {
     EditText editText;
@@ -46,8 +41,7 @@ public class FragmentSearch extends Fragment {
     ListView recent_ListView;
     ListView realTime_ListView;
     String url_String;
-    TextView textview1;
-    TextView textview2;
+    String myName;
     ArrayList<FragmentSearchData> data = new ArrayList<>();
     ArrayList<FragmentSearchData> recentData = new ArrayList<>();
     ArrayList<FragmentSearchData> realTimeData = new ArrayList<>();
@@ -59,22 +53,22 @@ public class FragmentSearch extends Fragment {
         search_ListView = view.findViewById(R.id.search_ListView);
         recent_ListView = view.findViewById(R.id.search_recent_ListView);
         realTime_ListView = view.findViewById(R.id.search_RealTime_ListView);
+        myName = ((MainActivity)getActivity()).getMyName();
+        TextView textView = view.findViewById(R.id.textView_Search_Myname);
+        textView.setText("안녕하세요. " + myName + "님!");
+        textView = view.findViewById(R.id.textView_Search_Random);
+        textView.setText(getRandomString());
 
         search_ListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                InputMethodManager inputMethodManager = (InputMethodManager) getContext().getSystemService(INPUT_METHOD_SERVICE);
+                inputMethodManager.hideSoftInputFromWindow(search_ListView.getWindowToken(), 0);
                 ((MainActivity)getActivity()).addRecentSearch(data.get(position).getName(), data.get(position).getGameid());
                 ((MainActivity)getActivity()).SetFragment("search_game", data.get(position).getName(), data.get(position).getGameid());
                 editText.setText("");
             }
         });
-        //한글 굵기 설정
-        textview1 = view.findViewById(R.id.textview_realfind);
-        textview1.setText("실시간 검색어");
-        textview1.setPaintFlags(textview1.getPaintFlags() | Paint.FAKE_BOLD_TEXT_FLAG);
-        textview2 = view.findViewById(R.id.textview_hotfind);
-        textview2.setText("최근 검색한 게임");
-        textview2.setPaintFlags(textview2.getPaintFlags() | Paint.FAKE_BOLD_TEXT_FLAG);
 
         editText.addTextChangedListener(new TextWatcher() {
             private Timer timer = new Timer();
@@ -218,7 +212,7 @@ public class FragmentSearch extends Fragment {
         }
     }
 
-    public void sortData(String s) {
+    private void sortData(String s) {
         final String name = s.toLowerCase();
         Collections.sort(data, new Comparator<FragmentSearchData>() {
             @Override
@@ -243,38 +237,17 @@ public class FragmentSearch extends Fragment {
 
     public void setRealTimeData() {
         realTimeData.clear();
-        HttpURLConnection conn = null;
+        ServerConnect serverConnect = new ServerConnect("getRealTimeSearch");
+        final JSONArray result = serverConnect.getJSONArray();
         try {
-            String urlString = "http://192.168.0.174:8080/bgm/DBConnection";
-            URL url = new URL(urlString);
-            conn = (HttpURLConnection) url.openConnection();
-
-            conn.setReadTimeout(3000);
-            conn.setConnectTimeout(3000);
-            conn.setRequestMethod("POST");
-            conn.setDoInput(true);
-            conn.setDoOutput(true);
-            conn.setRequestProperty("mode", "getRealTimeSearch");
-            conn.setRequestProperty("Content-Type", "application/json; charset=EUC-KR");
-            conn.setRequestProperty("Accept", "application/json");
-
-            int responseCode = conn.getResponseCode();
-            if (responseCode == HttpURLConnection.HTTP_OK) {
-                InputStream is = conn.getInputStream();
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                byte[] byteBuffer = new byte[1024];
-                byte[] byteData = null;
-                int length = 0;
-                while ((length = is.read(byteBuffer, 0, byteBuffer.length)) != -1) {
-                    baos.write(byteBuffer, 0, length);
-                }
-                byteData = baos.toByteArray();
-                String responseString = new String(byteData);
-                JSONArray jsonArray= new JSONArray(responseString);
-                for (int i = 0; i < jsonArray.length(); i++) {
-                    JSONObject game = jsonArray.getJSONObject(i);
-                    FragmentSearchData fragmentSearchData = new FragmentSearchData(game.getString("name"), game.getString("id"));
-                    realTimeData.add(fragmentSearchData);
+            if(result.getString(0).equals("success")) {
+                JSONArray jsonArray = result.getJSONArray(1);
+                if(jsonArray.length() > 0) {
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        JSONObject game = jsonArray.getJSONObject(i);
+                        FragmentSearchData fragmentSearchData = new FragmentSearchData(game.getString("name"), game.getString("id"));
+                        realTimeData.add(fragmentSearchData);
+                    }
                 }
             } else {
                 getActivity().runOnUiThread(new Runnable() {
@@ -284,15 +257,29 @@ public class FragmentSearch extends Fragment {
                     }
                 });
             }
-        } catch (MalformedURLException e) {
+        } catch (Exception e) {
             e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
-            e.printStackTrace();
-        } finally {
-            if(conn != null)
-                conn.disconnect();
         }
+    }
+
+    private String getRandomString(){
+        ArrayList<String> strings = new ArrayList<>();
+        strings.add("오늘은 어떤 게임이 하고싶으세요?");
+        strings.add("오늘 기분은 어때요?");
+        strings.add("오늘은 스플랜더를 해보는게 어때요?");
+        strings.add("오늘은 정령섬을 해보는게 어때요?");
+        strings.add("저는 보드게임만 있으면 행복해요.");
+        strings.add("내일은 보드게임 모임이 있었으면 좋겠어요.");
+        strings.add("보드게임...좋아하세요?");
+        strings.add("보드게임이...하고싶어요.");
+        strings.add("목숨 같은게 소중한게 아니야!\n보드게임이 소중한거라고!");
+        strings.add("보드게임은...죽은거지?!");
+        strings.add("넌 내게 보드게임을 줬어.");
+        strings.add("보드게임방에서 기다릴게.");
+        strings.add("인간이 5명이나 모이면\n반드시 1명은 보드게임을 한다.");
+        strings.add("그냥...다 졌으면 좋겠다.");
+
+        Random random = new Random();
+        return strings.get(random.nextInt(strings.size()));
     }
 }

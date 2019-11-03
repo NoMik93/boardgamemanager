@@ -1,36 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<LinearLayout android:id="@+id/linearLayout_contact_listview"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="80dp"
-    android:background="@android:color/white">
+    android:padding="5dp"
+    android:gravity="center_vertical">
 
     <ImageView android:id="@+id/contact_ListView_image"
         android:src="@drawable/context_image_base"
-        android:padding="5dp"
         android:layout_width="80dp"
         android:layout_height="80dp"
-        android:background="@android:color/white"/>
+        android:background="@drawable/border_round_image"/>
 
     <LinearLayout
+        android:paddingLeft="30dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
+        android:layout_weight="1"
         android:weightSum="2">
 
         <TextView android:id="@+id/contact_ListView_name"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
+            android:textSize="14pt"
             android:gravity="center"/>
 
         <TextView android:id="@+id/contact_ListView_number"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
+            android:textSize="9pt"
             android:gravity="center"/>
 
     </LinearLayout>
+
+    <ImageView android:id="@+id/imageView_select"
+        android:src="@drawable/ic_check_box_outline_blank_black_24dp"
+        android:padding="5dp"
+        android:layout_width="50dp"
+        android:layout_height="50dp"/>
 
 </LinearLayout>

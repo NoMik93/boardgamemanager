@@ -7,6 +7,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.provider.ContactsContract;
 import android.view.LayoutInflater;
@@ -14,8 +15,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import java.io.InputStream;
 import java.util.ArrayList;
 
@@ -53,18 +54,23 @@ public class ContactAdapter extends BaseAdapter {
                 inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             view = inflater.inflate(R.layout.activity_contact_listview_item, viewGroup, false);
         }
-        TextView textView = view.findViewById(R.id.contact_ListView_name);
-        textView.setText(data.get(i).name);
-        textView = view.findViewById(R.id.contact_ListView_number);
+        TextView textViewName = view.findViewById(R.id.contact_ListView_name);
+        textViewName.setText(data.get(i).name);
+        TextView textViewNumber = view.findViewById(R.id.contact_ListView_number);
         if (data.get(i).number != null)
-            textView.setText(data.get(i).number);
+            textViewNumber.setText(data.get(i).number);
         ImageView imageView = view.findViewById(R.id.contact_ListView_image);
         Bitmap image = loadPhoto(context.getContentResolver(), data.get(i).person_id, data.get(i).photo_id);
         if (image != null)
             imageView.setImageBitmap(image);
+        GradientDrawable drawable = (GradientDrawable)context.getDrawable(R.drawable.border_round_image);
+        imageView.setBackground(drawable);
+        imageView.setClipToOutline(true);
         final ImageView imageViewSelect = view.findViewById(R.id.imageView_select);
         if (i == 0){
-            view.setBackgroundColor(Color.GRAY);
+            LinearLayout linearLayout =  view.findViewById(R.id.linearLayout_contact_listview);
+            linearLayout.setBackgroundResource(R.drawable.border_round_blue2);
+            textViewName.setTextColor(Color.rgb(255,255,255));
             imageViewSelect.setImageResource(R.drawable.ic_indeterminate_check_box_black_24dp);
         } else {
             view.setOnClickListener(new View.OnClickListener() {
@@ -76,7 +82,7 @@ public class ContactAdapter extends BaseAdapter {
                         data.get(index).selected = false;
                     }
                     else {
-                        view.setBackgroundColor(Color.BLUE);
+                        view.setBackgroundColor(Color.rgb(230,230,230));
                         data.get(index).selected = true;
                         imageViewSelect.setImageResource(R.drawable.ic_check_box_black_24dp);
                     }

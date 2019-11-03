@@ -1,19 +1,12 @@
 package com.example.nomik.boardgamemanager;
 
-import android.Manifest;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,9 +14,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Toast;
-
 import java.util.ArrayList;
-
 import static android.app.Activity.RESULT_OK;
 
 public class FragmentContact extends Fragment {
@@ -36,7 +27,8 @@ public class FragmentContact extends Fragment {
             if (resultCode == RESULT_OK) {
                 ArrayList<ContactItem> temp = (ArrayList<ContactItem>)data.getSerializableExtra("players");
                 for (int i = 0; i < temp.size(); i++) {
-                    players.add(temp.get(i));
+                    if(!players.contains(temp.get(i)))
+                        players.add(temp.get(i));
                 }
                 selectReset();
                 ContactAdapter contactAdapter = new ContactAdapter(players);

@@ -1,28 +1,23 @@
 package com.example.nomik.boardgamemanager;
 
+import android.Manifest;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Looper;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.telephony.TelephonyManager;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
@@ -32,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
     private FragmentMap fragmentMap;
     private String myName = new String();
     private ArrayList<FragmentSearchData> recentSearch = new ArrayList<>();
+    private int fragmentNum;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +45,27 @@ public class MainActivity extends AppCompatActivity {
         } catch (JSONException e) {
             e.printStackTrace();
         }
+        if(myName.equals("")) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+            builder.setTitle("당신의 이름을 알려주세요");
+            final ClearEditText editText = new ClearEditText(MainActivity.this);
+            editText.setText(myName);
+            builder.setView(editText);
+            builder.setPositiveButton("확인", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    if(editText.getText().toString().equals("")) {
+                        Toast.makeText(getApplicationContext(), "이름을 입력해주세요.", Toast.LENGTH_SHORT).show();
+                    } else {
+                        myName = editText.getText().toString();
+                        SetFragment("update");
+                        dialogInterface.dismiss();
+                    }
+                }
+            });
+            AlertDialog alertDialog = builder.create();
+            alertDialog.show();
+        }
         ImageButton imageButton = findViewById(R.id.button_personal);
         imageButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -56,12 +73,27 @@ public class MainActivity extends AppCompatActivity {
                 AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
                 builder.setTitle("프로필 설정");
                 final ClearEditText editText = new ClearEditText(MainActivity.this);
+                final String myNameOld = myName;
                 editText.setText(myName);
+                editText.setSelection(myName.length());
                 builder.setView(editText);
                 builder.setPositiveButton("확인", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         myName = editText.getText().toString();
+                        if(!myName.equals(myNameOld)) {
+                            Thread thread = new Thread(){
+                                @Override
+                                public void run() {
+                                    if(nameUpdate(myNameOld)) {
+                                        SetFragment("update");
+                                    } else {
+                                        myName = myNameOld;
+                                    }
+                                }
+                            };
+                            thread.start();
+                        }
                         dialogInterface.dismiss();
                     }
                 });
@@ -75,6 +107,32 @@ public class MainActivity extends AppCompatActivity {
                 alertDialog.show();
             }
         });
+        imageButton = findViewById(R.id.button_help);
+        imageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Bundle bundle = new Bundle();
+                switch (fragmentNum) {
+                    case 0:
+                        bundle.putInt("fragmentNum", 0);
+                        break;
+                    case 1:
+                        bundle.putInt("fragmentNum", 1);
+                        break;
+                    case 2:
+                        bundle.putInt("fragmentNum", 2);
+                        break;
+                    case 3:
+                        bundle.putInt("fragmentNum", 3);
+                        break;
+                    default:
+                        break;
+                }
+                Intent intent = new Intent(MainActivity.this, HelpActivity.class);
+                intent.putExtras(bundle);
+                startActivity(intent);
+            }
+        });
 
         fragmentSearch = new FragmentSearch();
         fragmentSearchGame = new FragmentSearchGame();
@@ -82,6 +140,7 @@ public class MainActivity extends AppCompatActivity {
         fragmentMap = new FragmentMap();
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
         fragmentTransaction.replace(R.id.fragment_frame, fragmentSearch).commit();
+        fragmentNum = 0;
     }
 
     @Override
@@ -124,13 +183,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void SetFragment(String fragmentname) {
-        ImageButton search = (ImageButton)findViewById(R.id.button_search);
-        ImageButton game = (ImageButton)findViewById(R.id.button_game);
-        ImageButton map = (ImageButton)findViewById(R.id.button_map);
+        ImageButton search = findViewById(R.id.button_search);
+        ImageButton game = findViewById(R.id.button_game);
+        ImageButton map = findViewById(R.id.button_map);
 
        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
         switch(fragmentname) {
             case "search": {
+                fragmentNum = 0;
                 search.setImageResource(R.drawable.button_search_selected);
                 game.setImageResource(R.drawable.button_game_unselected);
                 map.setImageResource(R.drawable.button_map_unselected);
@@ -139,6 +199,7 @@ public class MainActivity extends AppCompatActivity {
                 break;
             }
             case "game": {
+                fragmentNum = 1;
                 search.setImageResource(R.drawable.button_search_unselected);
                 game.setImageResource(R.drawable.button_game_selected);
                 map.setImageResource(R.drawable.button_map_unselected);
@@ -147,11 +208,29 @@ public class MainActivity extends AppCompatActivity {
                 break;
             }
             case "map": {
+                fragmentNum = 2;
                 search.setImageResource(R.drawable.button_search_unselected);
                 game.setImageResource(R.drawable.button_game_unselected);
                 map.setImageResource(R.drawable.button_map_selected);
 
                fragmentTransaction.replace(R.id.fragment_frame, fragmentMap).commit();
+                break;
+            }
+            case "update": {
+                switch (fragmentNum) {
+                    case 0:
+                        fragmentSearch = new FragmentSearch();
+                        fragmentTransaction.replace(R.id.fragment_frame, fragmentSearch).commit();
+                        break;
+                    case 1:
+                        fragmentGame = new FragmentGame();
+                        fragmentTransaction.replace(R.id.fragment_frame, fragmentGame).commit();
+                        break;
+                    case 2:
+                        fragmentMap = new FragmentMap();
+                        fragmentTransaction.replace(R.id.fragment_frame, fragmentMap).commit();
+                        break;
+                }
                 break;
             }
         }
@@ -167,89 +246,51 @@ public class MainActivity extends AppCompatActivity {
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
         switch(fragmentname) {
             case "search_game": {
+                fragmentNum = 3;
                 Thread thread = new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        HttpURLConnection conn = null;
+                        JSONObject toSend = new JSONObject();
                         try {
-                            String year = null;
-                            String minplaytime = null;
-                            String maxplaytime = null;
-                            String minplayer = null;
-                            String maxplayer = null;
-                            String age = null;
-                            String imageurl = null;
-                            String publisher = null;
-                            String description = null;
-                            String urlString = "http://192.168.0.174:8080/bgm/DBConnection";
-                            URL url = new URL(urlString);
-                            conn = (HttpURLConnection) url.openConnection();
+                            toSend.put("id", id);
+                            toSend.put("name", name);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        ServerConnect serverConnect = new ServerConnect("search", toSend.toString());
+                        JSONObject result = serverConnect.getJSONObjectWithSend();
 
-                            conn.setReadTimeout(3000);
-                            conn.setConnectTimeout(3000);
-                            conn.setRequestMethod("POST");
-                            conn.setDoInput(true);
-                            conn.setDoOutput(true);
-                            conn.setRequestProperty("mode", "search");
-                            conn.setRequestProperty("id", id);
-                            conn.setRequestProperty("Content-Type", "application/json; charset=EUC-KR");
-                            conn.setRequestProperty("Accept", "application/json");
-
-                            OutputStreamWriter osw = new OutputStreamWriter(conn.getOutputStream(), "EUC-KR");
-                            osw.write(name);
-                            osw.close();
-
-                            int responseCode = conn.getResponseCode();
-                            if (responseCode == HttpURLConnection.HTTP_OK) {
-                                InputStream is = conn.getInputStream();
-                                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                                byte[] byteBuffer = new byte[1024];
-                                byte[] byteData = null;
-                                int length = 0;
-                                while ((length = is.read(byteBuffer, 0, byteBuffer.length)) != -1) {
-                                    baos.write(byteBuffer, 0, length);
-                                }
-                                byteData = baos.toByteArray();
-                                String responseString = new String(byteData);
-                                JSONObject jsonObject = new JSONObject(responseString);
-                                year = jsonObject.getString("year");
-                                minplaytime = jsonObject.getString("playTimeMin");
-                                maxplaytime = jsonObject.getString("playTimeMax");
-                                minplayer = jsonObject.getString("playerNumMin");
-                                maxplayer = jsonObject.getString("playerNumMax");
-                                age = jsonObject.getString("age");
-                                imageurl = jsonObject.getString("imageURL");
-                                publisher = jsonObject.getString("publisher");
-                                description = jsonObject.getString("description");
-                            } else {
-                                Toast.makeText(MainActivity.this, "서버에 연결할 수 없습니다.", Toast.LENGTH_SHORT).show();
-                            }
+                        String resultString = new String();
+                        try {
+                            resultString = result.getString("result");
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        if(resultString.equals("success")) {
                             fragmentSearchGame = new FragmentSearchGame();
                             Bundle bundle = new Bundle();
                             bundle.putString("myName", myName);
                             bundle.putString("name", name);
                             bundle.putString("id", id);
-                            bundle.putString("year", year);
-                            bundle.putString("minplaytime", minplaytime);
-                            bundle.putString("maxplaytime", maxplaytime);
-                            bundle.putString("minplayer", minplayer);
-                            bundle.putString("maxplayer", maxplayer);
-                            bundle.putString("age", age);
-                            bundle.putString("publisher", publisher);
-                            bundle.putString("description", description);
-                            bundle.putString("imageurl", imageurl);
+                            try {
+                                bundle.putString("year", result.getString("year"));
+                                bundle.putString("minplaytime", result.getString("playTimeMin"));
+                                bundle.putString("maxplaytime", result.getString("playTimeMax"));
+                                bundle.putString("minplayer", result.getString("playerNumMin"));
+                                bundle.putString("maxplayer", result.getString("playerNumMax"));
+                                bundle.putString("age", result.getString("age"));
+                                bundle.putString("publisher", result.getString("publisher"));
+                                bundle.putString("description", result.getString("description"));
+                                bundle.putString("imageurl", result.getString("imageURL"));
+                                bundle.putString("hasTable", result.getString("hasTable"));
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
                             fragmentSearchGame.setArguments(bundle);
-                        } catch (UnsupportedEncodingException e) {
-                            e.printStackTrace();
-                        } catch (MalformedURLException e) {
-                            e.printStackTrace();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        } finally {
-                            if(conn != null)
-                                conn.disconnect();
+                        } else {
+                            Looper.prepare();
+                            Toast.makeText(MainActivity.this, "서버에 연결할수 없습니다.", Toast.LENGTH_SHORT).show();
+                            Looper.loop();
                         }
                     }
                 });
@@ -264,6 +305,30 @@ public class MainActivity extends AppCompatActivity {
                 break;
             }
         }
+    }
+
+    private boolean nameUpdate(String oldName) {
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("oldName", oldName);
+            jsonObject.put("newName", myName);
+            jsonObject.put("phoneNum", getPhoneNumber());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        ServerConnect serverConnect = new ServerConnect("nameUpdate", jsonObject.toString());
+        if(serverConnect.send()){
+            Looper.prepare();
+            Toast.makeText(this, "저장이 완료되었습니다.", Toast.LENGTH_SHORT).show();
+            Looper.loop();
+            return true;
+        } else {
+            Looper.prepare();
+            Toast.makeText(this, "저장에 실패하였습니다.", Toast.LENGTH_SHORT).show();
+            Looper.loop();
+        }
+        return false;
     }
 
     public String getMyName(){
@@ -284,5 +349,14 @@ public class MainActivity extends AppCompatActivity {
 
     public ArrayList<FragmentSearchData> getRecentSearch() {
         return recentSearch;
+    }
+
+    private String getPhoneNumber() {
+        TelephonyManager tm = (TelephonyManager) this.getSystemService(TELEPHONY_SERVICE);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_PHONE_STATE}, 1);
+        }
+        String pNumber = tm.getLine1Number();
+        return pNumber;
     }
 }

@@ -9,17 +9,27 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:text="연락처에서 불러오기"/>
+        android:text="연락처에서 불러오기"
+        android:gravity="center"
+        android:textSize="12pt"/>
 
     <ListView android:id="@+id/contact_ListView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="8"/>
+        android:layout_weight="8"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
+        android:dividerHeight="10dp"
+        android:divider="#00000000"/>
 
     <Button android:id="@+id/contact_Button_complete"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
+        android:layout_margin="10dp"
+        android:textSize="15pt"
+        android:background="@color/BluesColorPalette_2"
+        android:textColor="@color/colorWhite"
         android:text="완료"/>
 
 </LinearLayout>

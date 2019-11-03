@@ -5,7 +5,8 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:gravity="center"
-    android:weightSum="5">
+    android:weightSum="5"
+    android:background="@color/colorGray">
 
     <HorizontalScrollView
         android:layout_width="match_parent"
@@ -17,16 +18,19 @@
             android:layout_height="match_parent"
             android:orientation="horizontal">
             <com.github.mikephil.charting.charts.PieChart android:id="@+id/chart_MyWinRate"
-                android:layout_width="240dp"
-                android:layout_height="match_parent">
+                android:layout_width="360dp"
+                android:layout_height="match_parent"
+                android:paddingHorizontal="20dp">
             </com.github.mikephil.charting.charts.PieChart>
             <com.github.mikephil.charting.charts.PieChart android:id="@+id/chart_GameRate"
-                android:layout_width="240dp"
-                android:layout_height="match_parent">
+                android:layout_width="360dp"
+                android:layout_height="match_parent"
+                android:paddingHorizontal="20dp">
             </com.github.mikephil.charting.charts.PieChart>
             <com.github.mikephil.charting.charts.PieChart android:id="@+id/chart_AllWinRate"
-                android:layout_width="240dp"
-                android:layout_height="match_parent">
+                android:layout_width="360dp"
+                android:layout_height="match_parent"
+                android:paddingHorizontal="20dp">
             </com.github.mikephil.charting.charts.PieChart>
         </LinearLayout>
     </HorizontalScrollView>
@@ -34,6 +38,8 @@
     <ListView android:id="@+id/listView_game"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="2"/>
+        android:layout_weight="2"
+        android:layout_margin="10dp"
+        android:dividerHeight="5dp"/>
 
 </LinearLayout>

@@ -3,11 +3,16 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="40dp">
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical">
 
     <TextView android:id="@+id/search_ListView_item_text"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center"/>
+        android:layout_height="wrap_content"
+        android:gravity="left"
+        android:background="@drawable/border_round"
+        android:fontFamily="@font/nanumbarungothic_family"
+        android:padding="5dp"
+        android:textSize="9pt"/>
 
 </LinearLayout>

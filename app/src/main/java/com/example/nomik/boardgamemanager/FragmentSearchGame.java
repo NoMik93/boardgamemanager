@@ -19,14 +19,10 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -69,6 +65,7 @@ public class FragmentSearchGame extends Fragment {
                     intent.putExtra("myName", getArguments().getString("myName"));
                     intent.putExtra("name", getArguments().getString("name"));
                     intent.putExtra("id", getArguments().getString("id"));
+                    intent.putExtra("hasTable", getArguments().getString("hasTable"));
                     startActivityForResult(intent, 0);
                 }
             });
@@ -151,47 +148,28 @@ public class FragmentSearchGame extends Fragment {
     }
 
     private void saveDescription(String id, String description) {
-        HttpURLConnection conn = null;
+        JSONObject obj = new JSONObject();
         try {
-            String urlString = "http://192.168.0.174:8080/bgm/DBConnection";
-            URL url = new URL(urlString);
-            conn = (HttpURLConnection) url.openConnection();
-
-            conn.setReadTimeout(15000);
-            conn.setConnectTimeout(15000);
-            conn.setRequestMethod("POST");
-            conn.setDoInput(true);
-            conn.setDoOutput(true);
-            conn.setRequestProperty("mode", "saveDescription");
-            conn.setRequestProperty("Content-Type", "application/json; charset=EUC-KR");
-            conn.setRequestProperty("Accept", "application/json");
-
-            OutputStreamWriter osw = new OutputStreamWriter(conn.getOutputStream(), "EUC-KR");
-            JSONObject obj = new JSONObject();
             obj.put("gameID", id);
             obj.put("description", description);
-            osw.write(obj.toString());
-            osw.close();
-
-            int responseCode = conn.getResponseCode();
-
-            if (responseCode == HttpURLConnection.HTTP_OK) {
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(getContext(), "저장이 완료되었습니다.", Toast.LENGTH_SHORT).show();
-                    }
-                });
-            }
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
         } catch (JSONException e) {
             e.printStackTrace();
-        } finally {
-            if(conn != null)
-                conn.disconnect();
+        }
+        ServerConnect serverConnect = new ServerConnect("saveDescription", obj.toString());
+        if(serverConnect.send()){
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(getContext(), "저장이 완료되었습니다.", Toast.LENGTH_SHORT).show();
+                }
+            });
+        } else {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(getContext(), "저장에 실패하였습니다.", Toast.LENGTH_SHORT).show();
+                }
+            });
         }
     }
 }

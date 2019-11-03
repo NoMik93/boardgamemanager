@@ -15,7 +15,6 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -25,11 +24,13 @@ public class FragmentGaming extends Fragment {
     private TextView textView_dice_eye;
     private TextView textView_dice;
     private TextView textView_coin;
-    private int dice_eye, dice, coin;
-    ArrayList<TrackerItem> data = new ArrayList<>();
+    private int dice_eye, dice, coin, hasTable;
+    private ArrayList<TrackerItem> data = new ArrayList<>();
     private static ListView trackers;
-    Thread thread;
+    private Thread timeThread;
+    private int time = 0;
     static DisplayMetrics dm;
+
 
     @Nullable
     @Override
@@ -44,6 +45,7 @@ public class FragmentGaming extends Fragment {
         dice_eye = 6;
         dice = 1;
         coin = 1;
+        hasTable = ((GameActivity)getActivity()).getHasTable();
         trackers = view.findViewById(R.id.listView_gaming_tracker);
         dm = getContext().getResources().getDisplayMetrics();
 
@@ -53,8 +55,7 @@ public class FragmentGaming extends Fragment {
             trackers.deferNotifyDataSetChanged();
             setListViewHeightBasedOnChildren(trackers);
         }
-
-        thread = new Thread(new Runnable() {
+        timeThread = new Thread(new Runnable() {
             @Override
             public void run() {
                 while (!Thread.interrupted()) {
@@ -66,16 +67,53 @@ public class FragmentGaming extends Fragment {
                             }
                         });
                         Thread.sleep(1000);
+                        time++;
                     } catch (InterruptedException e) {
+                        return;
                     } catch (NullPointerException e) {
                         Thread.interrupted();
                     }
                 }
             }
         });
-        thread.start();
+        timeThread.start();
 
-        ImageButton imageButton = view.findViewById(R.id.addTracker);
+        ImageButton imageButton = view.findViewById(R.id.imageButton_gaming_time);
+        final ImageButton finalImageButton = imageButton;
+        imageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(timeThread.isAlive()) {
+                    timeThread.interrupt();
+                    finalImageButton.setImageResource(R.drawable.ic_play_arrow_black_24dp);
+                } else {
+                    timeThread = new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            while (!Thread.interrupted()) {
+                                try {
+                                    getActivity().runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            update();
+                                        }
+                                    });
+                                    Thread.sleep(1000);
+                                    time++;
+                                } catch (InterruptedException e) {
+                                    return;
+                                } catch (NullPointerException e) {
+                                    Thread.interrupted();
+                                }
+                            }
+                        }
+                    });
+                    finalImageButton.setImageResource(R.drawable.ic_pause_black_24dp);
+                    timeThread.start();
+                }
+            }
+        });
+        imageButton = view.findViewById(R.id.addTracker);
         imageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -327,6 +365,61 @@ public class FragmentGaming extends Fragment {
         button_complete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                /*if (hasTable == 0) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                    builder.setMessage("서버에 점수 테이블이 없습니다.\n만드시려면 테이블을 입력해주세요.(','로 구분)");
+                    final EditText editText = new EditText(getContext());
+                    builder.setView(editText);
+                    builder.setPositiveButton("테이블 만들기", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            if(((GameActivity)getActivity()).SetTable(editText.getText().toString())) {
+                                dialogInterface.dismiss();
+                                ((GameActivity)getActivity()).SetTime(textView_time.getText().toString());
+                                ((GameActivity)getActivity()).SetFragment("makeScoreTable");
+                            } else {
+                                getActivity().runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Toast.makeText(getActivity(), "테이블이 잘못되었습니다.", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                            }
+                        }
+                    });
+                    builder.setNegativeButton("건너뛰기", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            dialogInterface.dismiss();
+                            ((GameActivity)getActivity()).SetTime(textView_time.getText().toString());
+                            ((GameActivity)getActivity()).SetFragment("score");
+                        }
+                    });
+                    AlertDialog alertDialog = builder.create();
+                    alertDialog.show();
+                } else {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                    builder.setMessage("서버에 점수 테이블이 있습니다.\n사용하시겠습니까?");
+                    builder.setPositiveButton("테이블 사용하기", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            dialogInterface.dismiss();
+                            ((GameActivity)getActivity()).SetTime(textView_time.getText().toString());
+                            ((GameActivity)getActivity()).SetFragment("scoreTable");
+                        }
+                    });
+                    builder.setNegativeButton("건너뛰기", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            dialogInterface.dismiss();
+                            ((GameActivity)getActivity()).SetTime(textView_time.getText().toString());
+                            ((GameActivity)getActivity()).SetFragment("score");
+                        }
+                    });
+                    AlertDialog alertDialog = builder.create();
+                    alertDialog.show();
+                }*/
+                timeThread.interrupt();
                 ((GameActivity)getActivity()).SetTime(textView_time.getText().toString());
                 ((GameActivity)getActivity()).SetFragment("score");
             }
@@ -336,10 +429,13 @@ public class FragmentGaming extends Fragment {
     }
 
     private void update() {
-        long milliTime = System.currentTimeMillis() - startTime;
+        /*long milliTime = System.currentTimeMillis() - startTime;
         long h = (milliTime / (1000 * 60 * 60));
         long m = (milliTime % (1000 * 60 * 60)) / (1000 * 60);
-        long s= ((milliTime % (1000 * 60 * 60)) % (1000 * 60)) / 1000;
+        long s= ((milliTime % (1000 * 60 * 60)) % (1000 * 60)) / 1000;*/
+        int h = (time / (60 * 60));
+        int m = (time % (60 * 60)) / (60);
+        int s= ((time % (60 * 60)) % (60));
 
         textView_time.setText(String.format("%02d:%02d:%02d", h, m, s));
     }

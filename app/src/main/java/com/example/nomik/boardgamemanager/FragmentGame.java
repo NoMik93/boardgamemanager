@@ -14,28 +14,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.Toast;
-
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.components.Description;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.utils.ColorTemplate;
-
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
-
 import static android.content.Context.TELEPHONY_SERVICE;
 
 public class FragmentGame extends Fragment {
@@ -66,6 +54,8 @@ public class FragmentGame extends Fragment {
         public void addNum() {
             num++;
         }
+        public void addNum(int num) { this.num += num; }
+        public void setNum(int num) { this.num = num; }
         @Override
         public boolean equals(@androidx.annotation.Nullable Object obj) {
             return this.name.equals(((Game)obj).getName());
@@ -92,6 +82,9 @@ public class FragmentGame extends Fragment {
         }
         public void addNum() {
             num++;
+        }
+        public void addNum(int num) {
+            this.num += num;
         }
         @Override
         public boolean equals(@androidx.annotation.Nullable Object obj) {
@@ -129,35 +122,13 @@ public class FragmentGame extends Fragment {
         return view;
     }
     private void getGameData() {
-        HttpURLConnection conn = null;
+        gameList.clear();
+        playerList.clear();
+        ServerConnect serverConnect = new ServerConnect("getGameRecord", getPhoneNumber());
+        JSONArray result = serverConnect.getJSONArrayWithSend();
         try {
-            String urlString = "http://192.168.0.174:8080/bgm/DBConnection";
-            URL url = new URL(urlString);
-            conn = (HttpURLConnection) url.openConnection();
-
-            conn.setReadTimeout(3000);
-            conn.setConnectTimeout(3000);
-            conn.setRequestMethod("POST");
-            conn.setDoInput(true);
-            conn.setDoOutput(true);
-            conn.setRequestProperty("mode", "getGameRecord");
-            conn.setRequestProperty("phoneNumber", getPhoneNumber());
-            conn.setRequestProperty("Content-Type", "application/json; charset=EUC-KR");
-            conn.setRequestProperty("Accept", "application/json");
-
-            int responseCode = conn.getResponseCode();
-            if (responseCode == HttpURLConnection.HTTP_OK) {
-                InputStream is = conn.getInputStream();
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                byte[] byteBuffer = new byte[1024];
-                byte[] byteData = null;
-                int length = 0;
-                while ((length = is.read(byteBuffer, 0, byteBuffer.length)) != -1) {
-                    baos.write(byteBuffer, 0, length);
-                }
-                byteData = baos.toByteArray();
-                String responseString = new String(byteData);
-                JSONArray jsonArray= new JSONArray(responseString);
+            if(result.getString(0).equals("success")) {
+                JSONArray jsonArray = result.getJSONArray(1);
                 for (int i = 0; i < jsonArray.length(); i++) {
                     JSONObject gameRecord = jsonArray.getJSONObject(i);
                     FragmentGameItem fragmentGameItem = new FragmentGameItem(gameRecord.getString("gameId"), gameRecord.getString("gameName"), gameRecord.getString("date"), gameRecord.getString("dateTime"), gameRecord.getString("playTime"));
@@ -195,17 +166,9 @@ public class FragmentGame extends Fragment {
                     }
                 });
             }
-        } catch (MalformedURLException e) {
+        } catch (Exception e) {
             e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
-            e.printStackTrace();
-        } finally {
-            if(conn != null)
-                conn.disconnect();
         }
-
         final FragmentGameAdapter fragmentGameAdapter = new FragmentGameAdapter(data);
         getActivity().runOnUiThread(new Runnable() {
             @Override
@@ -219,64 +182,97 @@ public class FragmentGame extends Fragment {
         Collections.sort(gameList);
         Collections.sort(playerList);
 
-        mWinChart.setUsePercentValues(true); // 그래프에 퍼센트 표시
+        mWinChart.setUsePercentValues(false); // 그래프에 퍼센트 표시
         //mWinChart.getLegend().setEnabled(false);
         ArrayList<PieEntry> mwEntry = new ArrayList<>(); // 그래프에 표시할 값들 저장
         mwEntry.add(new PieEntry(mWinGameNum, "승"));
         mwEntry.add((new PieEntry((data.size() - mWinGameNum), "패")));
         Description mwDescription = new Description();
         mwDescription.setText("나의 승률"); // 그래프 라벨
-        mwDescription.setTextSize(15);
+        mwDescription.setTextSize(30f);
         mWinChart.setDescription(mwDescription); // 원 그래프에 설명을 붙임
         PieDataSet mwDataSet = new PieDataSet(mwEntry, "");
         mwDataSet.setSliceSpace(3f);
         mwDataSet.setSelectionShift(5f);
         mwDataSet.setColors(ColorTemplate.PASTEL_COLORS); // 그래프 색깔 템플릿 설정
         PieData mwData = new PieData(mwDataSet);
-        mwData.setValueTextSize(15f);
+        mwData.setValueTextSize(30f);
         mwData.setValueTextColor(Color.BLACK); // 그래프 수치 색은 검은색
         mWinChart.setEntryLabelColor(Color.BLACK); // 그래프 수치의 이름 색은 검은색
         mWinChart.setData(mwData);
+        mWinChart.getLegend().setEnabled(false); // 아래 항목 제거
+        mWinChart.setEntryLabelTextSize(30f); // 그래프 항목 이름 크기
 
-        gameChart.setUsePercentValues(true);
+        gameChart.setUsePercentValues(false);
         ArrayList<PieEntry> gEntry = new ArrayList<>();
-        for(int i = 0; i < gameList.size(); i++) {
-            PieEntry p = new PieEntry(gameList.get(i).getNum(), gameList.get(i).getName());
+        if(gameList.size() > 4) {
+            for(int i = 0; i < 4; i++) {
+                PieEntry p = new PieEntry(gameList.get(i).getNum(), gameList.get(i).getName());
+                gEntry.add(p);
+            }
+            Game other = new Game("그 외");
+            other.setNum(0);
+            for(int i = 4; i < gameList.size(); i++) {
+                other.addNum(gameList.get(i).getNum());
+            }
+            PieEntry p = new PieEntry(other.getNum(), other.getName());
             gEntry.add(p);
+        } else {
+            for(int i = 0; i < gameList.size(); i++) {
+                PieEntry p = new PieEntry(gameList.get(i).getNum(), gameList.get(i).getName());
+                gEntry.add(p);
+            }
         }
         Description gDescription = new Description();
         gDescription.setText("게임별 비율");
-        gDescription.setTextSize(15);
+        gDescription.setTextSize(30f);
         gameChart.setDescription(gDescription);
         PieDataSet gDataSet = new PieDataSet(gEntry, "");
         gDataSet.setSliceSpace(3f);
         gDataSet.setSelectionShift(5f);
         gDataSet.setColors(ColorTemplate.COLORFUL_COLORS);
         PieData gData = new PieData(gDataSet);
-        gData.setValueTextSize(15f);
+        gData.setValueTextSize(30f);
         gData.setValueTextColor(Color.BLACK);
         gameChart.setEntryLabelColor(Color.BLACK);
         gameChart.setData(gData);
+        gameChart.getLegend().setEnabled(false);
+        gameChart.setEntryLabelTextSize(30f);
 
-        aWinChart.setUsePercentValues(true);
+        aWinChart.setUsePercentValues(false);
         ArrayList<PieEntry> awEntry = new ArrayList<>();
-        for(int i = 0; i < playerList.size(); i++) {
-            PieEntry p = new PieEntry(playerList.get(i).getNum(), playerList.get(i).getName());
+        if(playerList.size() > 4) {
+            for(int i = 0; i < 4; i++) {
+                PieEntry p = new PieEntry(playerList.get(i).getNum(), playerList.get(i).getName());
+                awEntry.add(p);
+            }
+            Player other = new Player("그 외", 0);
+            for(int i = 4; i < playerList.size(); i++) {
+                other.addNum(playerList.get(i).getNum());
+            }
+            PieEntry p = new PieEntry(other.getNum(), other.getName());
             awEntry.add(p);
+        } else {
+            for(int i = 0; i < playerList.size(); i++) {
+                PieEntry p = new PieEntry(playerList.get(i).getNum(), playerList.get(i).getName());
+                awEntry.add(p);
+            }
         }
         Description awDescription = new Description();
-        awDescription.setText("전체 승률");
-        awDescription.setTextSize(15);
+        awDescription.setText("각각의 승률");
+        awDescription.setTextSize(30f);
         aWinChart.setDescription(awDescription);
         PieDataSet awDataSet = new PieDataSet(awEntry, "");
         awDataSet.setSliceSpace(3f);
         awDataSet.setSelectionShift(5f);
         awDataSet.setColors(ColorTemplate.MATERIAL_COLORS);
         PieData awData = new PieData(awDataSet);
-        awData.setValueTextSize(15f);
+        awData.setValueTextSize(30f);
         awData.setValueTextColor(Color.BLACK);
         aWinChart.setEntryLabelColor(Color.BLACK);
         aWinChart.setData(awData);
+        aWinChart.getLegend().setEnabled(false);
+        aWinChart.setEntryLabelTextSize(30f);
     }
 
     private String getPhoneNumber() {

@@ -1,14 +1,354 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:gravity="center">
+    android:gravity="center"
+    android:weightSum="100">
+
+    <LinearLayout android:id="@+id/map_newMarker"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <Button android:id="@+id/button_marker_create"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:layout_margin="10dp"
+            android:textSize="15pt"
+            android:gravity="center"
+            android:background="@color/BluesColorPalette_2"
+            android:textColor="@color/colorWhite"
+            android:text="생성"
+            android:layout_marginRight="20dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:weightSum="4"
+            android:background="@drawable/border_round"
+            android:layout_margin="10dp">
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:textSize="10pt"
+                android:text="모임명" />
+
+            <EditText android:id="@+id/editText_marker_title"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="3"
+                android:imeOptions="actionNext"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:weightSum="4"
+            android:background="@drawable/border_round"
+            android:layout_margin="10dp">
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:textSize="10pt"
+                android:text="날짜" />
+
+            <EditText android:id="@+id/editText_marker_date"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="3"
+                android:imeOptions="actionNext"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:weightSum="4"
+            android:background="@drawable/border_round"
+            android:layout_margin="10dp">
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:textSize="10pt"
+                android:text="상세주소" />
+
+            <EditText android:id="@+id/editText_marker_detail"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="3"
+                android:imeOptions="actionDone"/>
+        </LinearLayout>
+    </LinearLayout>
+
+
+    <ScrollView android:id="@+id/map_hostView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_margin="5dp"
+                android:weightSum="2"
+                android:gravity="right">
+
+                <Button android:id="@+id/button_marker_host_delete"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_margin="10dp"
+                    android:textSize="15pt"
+                    android:gravity="center"
+                    android:background="@color/BluesColorPalette_2"
+                    android:textColor="@color/colorWhite"
+                    android:text="삭제" />
+
+                <Button android:id="@+id/button_marker_host_update"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_margin="10dp"
+                    android:textSize="15pt"
+                    android:gravity="center"
+                    android:background="@color/BluesColorPalette_2"
+                    android:textColor="@color/colorWhite"
+                    android:text="수정" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:weightSum="4"
+                android:background="@drawable/border_round"
+                android:layout_margin="5dp"
+                android:focusable="true"
+                android:focusableInTouchMode="true">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:text="모임명"
+                    android:gravity="center"
+                    android:textSize="10pt"/>
+
+                <EditText android:id="@+id/editText_marker_host_title"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="3"
+                    android:imeOptions="actionNext"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:weightSum="4"
+                android:background="@drawable/border_round"
+                android:layout_margin="5dp">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:text="날짜"
+                    android:gravity="center"
+                    android:textSize="10pt" />
+
+                <EditText android:id="@+id/editText_marker_host_date"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="3"
+                    android:imeOptions="actionNext"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:weightSum="4"
+                android:background="@drawable/border_round"
+                android:layout_margin="5dp">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:text="상세주소"
+                    android:gravity="center"
+                    android:textSize="10pt"/>
+
+                <EditText android:id="@+id/editText_marker_host_detail"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="3"
+                    android:imeOptions="actionDone"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:weightSum="4"
+                android:background="@drawable/border_round"
+                android:layout_margin="5dp">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:text="참가자"
+                    android:gravity="center"
+                    android:textSize="10pt"/>
+
+                <TextView android:id="@+id/textView_marker_host_entry"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="3"
+                    android:textSize="10pt"
+                    android:layout_marginVertical="10dp"
+                    android:gravity="center_vertical"/>
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+
+    <ScrollView android:id="@+id/map_entryView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0"
+        android:visibility="gone">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <Button android:id="@+id/button_marker_entry_enter"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="참가/참가취소"
+                android:layout_margin="10dp"
+                android:textSize="15pt"
+                android:gravity="center"
+                android:background="@color/BluesColorPalette_2"
+                android:textColor="@color/colorWhite"
+                android:layout_gravity="right"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:weightSum="4"
+                android:background="@drawable/border_round"
+                android:layout_margin="5dp">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:text="모임명"
+                    android:gravity="center"
+                    android:textSize="10pt"/>
+
+                <TextView android:id="@+id/textView_marker_entry_title"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="3"
+                    android:layout_marginVertical="5dp"
+                    android:textSize="10pt"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:weightSum="4"
+                android:background="@drawable/border_round"
+                android:layout_margin="5dp">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:text="날짜"
+                    android:gravity="center"
+                    android:textSize="10pt"/>
+
+                <TextView android:id="@+id/textView_marker_entry_date"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="3"
+                    android:layout_marginVertical="5dp"
+                    android:textSize="10pt"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:weightSum="4"
+                android:background="@drawable/border_round"
+                android:layout_margin="5dp">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:text="상세주소"
+                    android:gravity="center"
+                    android:textSize="10pt" />
+
+                <TextView android:id="@+id/textView_marker_entry_detail"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="3"
+                    android:layout_marginVertical="5dp"
+                    android:textSize="10pt"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:weightSum="4"
+                android:background="@drawable/border_round"
+                android:layout_margin="5dp">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:text="참가자"
+                    android:gravity="center"
+                    android:textSize="10pt"/>
+
+                <TextView android:id="@+id/textView_marker_entry_entry"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="3"
+                    android:layout_marginTop="5dp"
+                    android:textSize="10pt"/>
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
 
     <com.google.android.gms.maps.MapView
         android:id="@+id/map"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:name="com.google.android.gms.maps.MapFragment"/>
-</RelativeLayout>
+        android:layout_height="0dp"
+        android:name="com.google.android.gms.maps.MapFragment"
+        android:layout_weight="100"/>
+</LinearLayout>

@@ -7,12 +7,6 @@ public class FragmentSearchData{
     private String gameid;
     private String year;
 
-    FragmentSearchData() {
-        name = "검색 결과가 없습니다.";
-        gameid = "0";
-        year = "1900";
-    }
-
     FragmentSearchData(String _name, String _gameid) {
         name = _name;
         gameid = _gameid;
@@ -38,14 +32,6 @@ public class FragmentSearchData{
 
     void setName(String _name) {
         name = _name;
-    }
-
-    void setGameid(String _gameid) {
-        gameid = _gameid;
-    }
-
-    void setYear(String _year) {
-        year = _year;
     }
 
     @Override

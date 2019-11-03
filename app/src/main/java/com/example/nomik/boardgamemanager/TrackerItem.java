@@ -1,6 +1,7 @@
 package com.example.nomik.boardgamemanager;
 
 public class TrackerItem{
+    private String name;
     private int color;
     private int value;
     private int change;
@@ -75,5 +76,13 @@ public class TrackerItem{
     public boolean select(){
         selected = !selected;
         return selected;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
     }
 }

@@ -24,8 +24,12 @@ public class ContactItem implements Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if(obj instanceof ContactItem)
-            return numberChanged().equals(((ContactItem) obj).numberChanged());
+        /*if(obj instanceof ContactItem)
+            return numberChanged().equals(((ContactItem) obj).numberChanged());*/
+        if (name.equals(((ContactItem)obj).name)) {
+            if (number.equals(((ContactItem)obj).number))
+                return true;
+        }
         return false;
     }
 }

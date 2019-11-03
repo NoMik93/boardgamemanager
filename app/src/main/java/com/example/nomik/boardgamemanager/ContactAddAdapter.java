@@ -15,7 +15,6 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import java.io.InputStream;
 import java.util.ArrayList;
 
@@ -72,7 +71,7 @@ public class ContactAddAdapter extends BaseAdapter {
                     data.get(index).selected = false;
                 }
                 else {
-                    view.setBackgroundColor(Color.BLUE);
+                    view.setBackgroundColor(Color.rgb(230,230,230));
                     imageViewSelect.setImageResource(R.drawable.ic_check_box_black_24dp);
                     data.get(index).selected = true;
                 }
